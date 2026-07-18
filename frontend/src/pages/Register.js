@@ -1,0 +1,246 @@
+import React, { useState } from 'react';
+import { Link, useNavigate } from 'react-router-dom';
+import { useAuth } from '../context/AuthContext';
+import { useTheme } from '../context/ThemeContext';
+import { toast } from 'react-toastify';
+
+const Register = () => {
+  const [formData, setFormData] = useState({
+    username: '',
+    email: '',
+    first_name: '',
+    last_name: '',
+    password: '',
+    password_confirm: ''
+  });
+  const [errors, setErrors] = useState({});
+  const [loading, setLoading] = useState(false);
+  const { isDarkTheme } = useTheme();
+
+  const validateField = (name, value) => {
+    switch (name) {
+      case 'first_name':
+        return value.length < 2 ? 'First name must be at least 2 characters' : '';
+      case 'last_name':
+        return value.length < 2 ? 'Last name must be at least 2 characters' : '';
+      case 'username':
+        return value.length < 3 ? 'Username must be at least 3 characters' : '';
+      case 'email':
+        const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return !emailRegex.test(value) ? 'Please enter a valid email address' : '';
+      case 'password':
+        return value.length < 6 ? 'Password must be at least 6 characters' : '';
+      case 'password_confirm':
+        return value !== formData.password ? 'Passwords do not match' : '';
+      default:
+        return '';
+    }
+  };
+  const { register } = useAuth();
+  const navigate = useNavigate();
+
+  const handleChange = (e) => {
+    const { name, value } = e.target;
+    setFormData({
+      ...formData,
+      [name]: value
+    });
+    
+    const error = validateField(name, value);
+    setErrors({
+      ...errors,
+      [name]: error
+    });
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    
+    const newErrors = {};
+    Object.keys(formData).forEach(key => {
+      const error = validateField(key, formData[key]);
+      if (error) newErrors[key] = error;
+    });
+    
+    if (Object.keys(newErrors).length > 0) {
+      setErrors(newErrors);
+      return;
+    }
+
+    setLoading(true);
+    const result = await register(formData);
+    
+    if (result.success) {
+      toast.success('Registration successful! Please log in.');
+      navigate('/login');
+    } else {
+      if (typeof result.error === 'object') {
+        Object.values(result.error).forEach(errors => {
+          if (Array.isArray(errors)) {
+            errors.forEach(error => toast.error(error));
+          } else {
+            toast.error(errors);
+          }
+        });
+      } else {
+        toast.error(result.error);
+      }
+    }
+    
+    setLoading(false);
+  };
+
+  return (
+    <div
+      className="min-vh-100 d-flex align-items-center"
+      style={{
+        background: isDarkTheme
+          ? 'linear-gradient(180deg, #0f172a 0%, #111827 100%)'
+          : 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)',
+        paddingTop: '80px',
+      }}
+    >
+      <div className="container py-5">
+        <div className="row justify-content-center">
+          <div className="col-md-8 col-lg-6">
+            <div
+              className="card border-0"
+              style={{
+                background: isDarkTheme ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.96)',
+                backdropFilter: 'blur(20px)',
+                borderRadius: '20px',
+                boxShadow: isDarkTheme ? '0 8px 32px rgba(0,0,0,0.3)' : '0 12px 32px rgba(15,23,42,0.12)',
+                border: `1px solid ${isDarkTheme ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`,
+              }}
+            >
+              <div className="card-body p-5">
+                <div className="text-center mb-4">
+                  <i className="fas fa-couch mb-3" style={{fontSize: '3rem', background: 'linear-gradient(45deg, #667eea, #764ba2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}></i>
+                  <h2 className={`mb-2 ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Join FurnitureHub</h2>
+                  <p className={isDarkTheme ? 'text-muted' : 'text-secondary'}>Create your account to get started</p>
+                </div>
+                <form onSubmit={handleSubmit}>
+                  <div className="row">
+                    <div className="col-md-6 mb-3">
+                      <label htmlFor="first_name" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>First Name</label>
+                      <input
+                        type="text"
+                        className={`form-control ${errors.first_name ? 'is-invalid' : ''}`}
+                        style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.first_name ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
+                        id="first_name"
+                        name="first_name"
+                        value={formData.first_name}
+                        onChange={handleChange}
+                        placeholder="Enter first name"
+                        required
+                      />
+                      {errors.first_name && <div className="text-danger small mt-1">{errors.first_name}</div>}
+                    </div>
+                    <div className="col-md-6 mb-3">
+                      <label htmlFor="last_name" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Last Name</label>
+                      <input
+                        type="text"
+                        className={`form-control ${errors.last_name ? 'is-invalid' : ''}`}
+                        style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.last_name ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
+                        id="last_name"
+                        name="last_name"
+                        value={formData.last_name}
+                        onChange={handleChange}
+                        placeholder="Enter last name"
+                        required
+                      />
+                      {errors.last_name && <div className="text-danger small mt-1">{errors.last_name}</div>}
+                    </div>
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="username" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Username</label>
+                    <input
+                      type="text"
+                      className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.username ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
+                      id="username"
+                      name="username"
+                      value={formData.username}
+                      onChange={handleChange}
+                      placeholder="Choose a username"
+                      required
+                    />
+                    {errors.username && <div className="text-danger small mt-1">{errors.username}</div>}
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="email" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Email</label>
+                    <input
+                      type="email"
+                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.email ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
+                      id="email"
+                      name="email"
+                      value={formData.email}
+                      onChange={handleChange}
+                      placeholder="Enter your email"
+                      required
+                    />
+                    {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
+                  </div>
+                  <div className="mb-3">
+                    <label htmlFor="password" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Password</label>
+                    <input
+                      type="password"
+                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.password ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
+                      id="password"
+                      name="password"
+                      value={formData.password}
+                      onChange={handleChange}
+                      placeholder="Create a password"
+                      required
+                    />
+                    {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
+                  </div>
+                  <div className="mb-4">
+                    <label htmlFor="password_confirm" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Confirm Password</label>
+                    <input
+                      type="password"
+                      className={`form-control ${errors.password_confirm ? 'is-invalid' : ''}`}
+                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.password_confirm ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
+                      id="password_confirm"
+                      name="password_confirm"
+                      value={formData.password_confirm}
+                      onChange={handleChange}
+                      placeholder="Confirm your password"
+                      required
+                    />
+                    {errors.password_confirm && <div className="text-danger small mt-1">{errors.password_confirm}</div>}
+                  </div>
+                  <button
+                    type="submit"
+                    className="btn w-100 fw-bold"
+                    style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', borderRadius: '10px', padding: '12px'}}
+                    disabled={loading}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
+                        Creating Account...
+                      </>
+                    ) : (
+                      <>
+                        <i className="fas fa-user-plus me-2"></i>
+                        Create Account
+                      </>
+                    )}
+                  </button>
+                </form>
+                <div className="text-center mt-4">
+                  <p className={`${isDarkTheme ? 'text-muted' : 'text-secondary'} mb-0`}>Already have an account? <Link to="/login" style={{color: '#667eea', textDecoration: 'none', fontWeight: '500'}}>Sign In</Link></p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
+export default Register;
