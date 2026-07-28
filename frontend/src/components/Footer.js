@@ -24,9 +24,9 @@ const Footer = () => {
             </p>
             <div className="social-links">
               {[
-                { icon: 'fa-facebook-f',  href: '#', label: 'Facebook'  },
-                { icon: 'fa-instagram',   href: '#', label: 'Instagram' },
-                { icon: 'fa-twitter',     href: '#', label: 'Twitter'   },
+                { icon: 'fa-facebook-f', href: '#', label: 'Facebook' },
+                { icon: 'fa-instagram', href: '#', label: 'Instagram' },
+                { icon: 'fa-twitter', href: '#', label: 'Twitter' },
                 { icon: 'fa-pinterest-p', href: '#', label: 'Pinterest' },
               ].map(s => (
                 <a
@@ -47,11 +47,11 @@ const Footer = () => {
             <h6 className="footer-heading">Quick Links</h6>
             <ul className="footer-links">
               {[
-                { label: 'Home',       to: '/' },
-                { label: 'Products',   to: '/products' },
-                { label: 'Room AI',    to: '/room-ai' },
-                { label: 'About Us',   to: '/about' },
-                { label: 'Contact',    to: '/contact' },
+                { label: 'Home', to: '/' },
+                { label: 'Products', to: '/products' },
+                { label: 'Room AI', to: '/room-ai' },
+                { label: 'About Us', to: '/about' },
+                { label: 'Contact', to: '/contact' },
               ].map(l => (
                 <li key={l.label}>
                   <Link to={l.to} className="footer-link">{l.label}</Link>
@@ -66,10 +66,10 @@ const Footer = () => {
             <ul className="footer-links">
               {[
                 { label: 'Living Room', slug: 'living-room' },
-                { label: 'Bedroom',     slug: 'bedroom'     },
+                { label: 'Bedroom', slug: 'bedroom' },
                 { label: 'Dining Room', slug: 'dining-room' },
-                { label: 'Office',      slug: 'office'      },
-                { label: 'Storage',     slug: 'storage'     },
+                { label: 'Office', slug: 'office' },
+                { label: 'Storage', slug: 'storage' },
               ].map(c => (
                 <li key={c.label}>
                   <Link to={`/products?category=${c.slug}`} className="footer-link">{c.label}</Link>
@@ -84,8 +84,8 @@ const Footer = () => {
             <div style={{ marginBottom: 24 }}>
               {[
                 { icon: 'fa-map-marker-alt', text: '123 Furniture Street, Design City' },
-                { icon: 'fa-phone',          text: '+91 1234 567 890' },
-                { icon: 'fa-envelope',       text: 'hello@furniturezone.com' },
+                { icon: 'fa-phone', text: '+91 1234 567 890' },
+                { icon: 'fa-envelope', text: 'hello@furniturezone.com' },
               ].map(item => (
                 <div className="contact-item" key={item.text}>
                   <i className={`fas ${item.icon}`}></i>

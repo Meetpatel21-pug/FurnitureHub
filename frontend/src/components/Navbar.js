@@ -38,7 +38,7 @@ const Navbar = () => {
     }
     return () => document.body.classList.remove('mobile-menu-open');
   }, [mobileMenuOpen]);
-  
+
   // Handle scroll event to change navbar background
   useEffect(() => {
     const handleScroll = () => {
@@ -48,9 +48,9 @@ const Navbar = () => {
         setScrolled(false);
       }
     };
-    
+
     window.addEventListener('scroll', handleScroll);
-    
+
     // Clean up event listener
     return () => {
       window.removeEventListener('scroll', handleScroll);
@@ -67,13 +67,13 @@ const Navbar = () => {
 
         <div className={`navbar-menu ${mobileMenuOpen ? 'mobile-open' : ''}`}>
           <i className="fas fa-times close-icon d-md-none" onClick={closeMobileMenu}></i>
-          
+
           <Link to="/" className="nav-link" onClick={closeMobileMenu}>Home</Link>
           <Link to="/products" className="nav-link" onClick={closeMobileMenu}>Products</Link>
           <Link to="/room-ai" className="nav-link" onClick={closeMobileMenu}>Room AI</Link>
           <Link to="/about" className="nav-link" onClick={closeMobileMenu}>About</Link>
           <Link to="/contact" className="nav-link" onClick={closeMobileMenu}>Contact</Link>
-          
+
           {isAuthenticated && (
             <>
               {user?.is_staff && (
@@ -93,7 +93,7 @@ const Navbar = () => {
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
                 className="form-control me-2"
-                style={{background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white'}}
+                style={{ background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.2)', color: 'white' }}
               />
               <button type="submit" className="btn btn-outline-light">
                 <i className="fas fa-search"></i>
@@ -150,7 +150,7 @@ const Navbar = () => {
                   <span className="cart-badge">{getCartItemCount()}</span>
                 )}
               </Link>
-              
+
               <div className="user-menu dropdown d-none d-md-block">
                 <button className="user-button" data-bs-toggle="dropdown">
                   <i className="fas fa-user"></i>

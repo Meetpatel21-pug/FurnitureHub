@@ -1,32 +1,13 @@
-import React, { useState, useEffect, useCallback, useMemo } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { productsAPI, mlAPI, ordersAPI, roomAIAPI } from '../services/api';
-import ProductCard from '../components/ProductCard';
+import { mlAPI, ordersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
-import { toast } from 'react-toastify';
-
-const backendBaseUrl = 'http://127.0.0.1:8000';
-
-const resolveMediaUrl = (value) => {
-  if (!value) return '';
-  if (value.startsWith('http://') || value.startsWith('https://')) return value;
-  return `${backendBaseUrl}${value}`;
-};
 
 const Home = () => {
   const { user } = useAuth();
-  const [products, setProducts] = useState([]);
-  const [categories, setCategories] = useState([]);
   const [recommendations, setRecommendations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastOrderTime, setLastOrderTime] = useState(null);
-  const [roomImage, setRoomImage] = useState(null);
-  const [roomImagePreview, setRoomImagePreview] = useState('');
-  const [roomHint, setRoomHint] = useState('');
-  const [styleHint, setStyleHint] = useState('');
-  const [budget, setBudget] = useState('');
-  const [analyzingRoom, setAnalyzingRoom] = useState(false);
-  const [roomAnalysis, setRoomAnalysis] = useState(null);
 
   // Function to fetch recommendations
   const fetchRecommendations = useCallback(async () => {
@@ -40,49 +21,6 @@ const Home = () => {
     }
   }, []);
 
-  const roomPreviewUrl = useMemo(() => {
-    return resolveMediaUrl(roomAnalysis?.preview?.annotated_image_url) || roomImagePreview;
-  }, [roomAnalysis, roomImagePreview]);
-
-  const handleRoomImageChange = (event) => {
-    const file = event.target.files?.[0];
-    if (!file) {
-      setRoomImage(null);
-      setRoomImagePreview('');
-      return;
-    }
-
-    setRoomImage(file);
-    setRoomImagePreview(URL.createObjectURL(file));
-  };
-
-  const handleRoomAnalyze = async (event) => {
-    event.preventDefault();
-
-    if (!roomImage) {
-      toast.error('Choose a room image first.');
-      return;
-    }
-
-    const formData = new FormData();
-    formData.append('image', roomImage);
-    if (budget) formData.append('budget', budget);
-    if (styleHint) formData.append('style', styleHint);
-    if (roomHint) formData.append('room_hint', roomHint);
-
-    try {
-      setAnalyzingRoom(true);
-      const response = await roomAIAPI.analyzeRoom(formData);
-      setRoomAnalysis(response.data);
-      toast.success('Room analysis ready.');
-    } catch (error) {
-      console.error('Room analysis failed:', error);
-      toast.error(error.response?.data?.error || 'Unable to analyze the room image.');
-    } finally {
-      setAnalyzingRoom(false);
-    }
-  };
-
   // Check for recent orders to refresh recommendations
   useEffect(() => {
     if (user) {
@@ -90,11 +28,11 @@ const Home = () => {
         try {
           const ordersRes = await ordersAPI.getHistory();
           const orders = ordersRes.data || [];
-          
+
           if (orders.length > 0) {
             const latestOrder = orders[0];
             const orderTime = new Date(latestOrder.created_at).getTime();
-            
+
             // If there's a new order or first load
             if (!lastOrderTime || orderTime > lastOrderTime) {
               setLastOrderTime(orderTime);
@@ -106,9 +44,9 @@ const Home = () => {
           console.error('Error checking orders:', error);
         }
       };
-      
+
       checkForNewOrders();
-      
+
       // Poll for new orders every 30 seconds
       const interval = setInterval(checkForNewOrders, 30000);
       return () => clearInterval(interval);
@@ -118,25 +56,13 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const [productsRes, categoriesRes, recommendationsRes] = await Promise.all([
-          productsAPI.getAll({ limit: 8 }),
-          productsAPI.getCategories(),
-          mlAPI.getRecommendations('knn', 6).catch(() => ({ data: { recommendations: [] } }))
-        ]);
-        
-        const productsData = productsRes.data.results || productsRes.data || [];
-        const categoriesData = categoriesRes.data || [];
+        const recommendationsRes = await mlAPI.getRecommendations('knn', 6).catch(() => ({ data: { recommendations: [] } }));
         const recommendationsData = recommendationsRes.data.recommendations || [];
-        
-        setProducts(Array.isArray(productsData) ? productsData : []);
-        setCategories(Array.isArray(categoriesData) ? categoriesData : []);
         setRecommendations(Array.isArray(recommendationsData) ? recommendationsData : []);
-        
+
         console.log('KNN Recommendations:', recommendationsData);
       } catch (error) {
         console.error('Error fetching data:', error);
-        setProducts([]);
-        setCategories([]);
         setRecommendations([]);
       } finally {
         setLoading(false);
@@ -232,8 +158,6 @@ const Home = () => {
         </button>
       </div>
 
-
-
       {/* Recommended Products */}
       <section className="py-5">
         <div className="container">
@@ -241,7 +165,7 @@ const Home = () => {
             <h2 className="fw-bold text-white">Recommended Products</h2>
             <p className="text-muted">Handpicked selections for you</p>
           </div>
-          <div className="row g-4">
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
             {(recommendations.length > 0 ? recommendations : [
               {
                 id: 1,
@@ -292,12 +216,12 @@ const Home = () => {
                 category: 'Living Room'
               }
             ]).slice(0, 6).map((product, index) => (
-              <div key={product.id || index} className="col-6 col-md-6 col-lg-4">
+              <div key={product.id || index}>
                 <div className="modern-product-card">
                   <div className="product-image-container">
-                    <img 
-                      src={product.image_url || '/api/placeholder/300/200'} 
-                      className="product-image" 
+                    <img
+                      src={product.image_url || '/api/placeholder/300/200'}
+                      className="product-image"
                       alt={product.name}
                     />
                     {product.order_count > 0 && (
@@ -335,128 +259,6 @@ const Home = () => {
           </div>
         </div>
       </section>
-
-      {/* Room AI Quick Analyzer */}
-      <section className="py-5">
-        <div className="container">
-          <div className="row g-4 align-items-stretch">
-            <div className="col-lg-5">
-              <div className="p-4 rounded-4 border h-100" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                <p className="text-uppercase fw-semibold mb-2" style={{ letterSpacing: '0.16em', color: '#8bd3ff' }}>Room AI</p>
-                <h2 className="fw-bold text-white mb-3">Upload a room photo and preview furniture suggestions right here.</h2>
-                <p className="text-white-50 mb-4">The same vision pipeline powers the dedicated analyzer page and gives you a quick-start version on the home page.</p>
-
-                <form onSubmit={handleRoomAnalyze} className="d-grid gap-3">
-                  <label className="btn btn-outline-light btn-lg py-3 text-start position-relative overflow-hidden" style={{ borderStyle: 'dashed' }}>
-                    <input type="file" accept="image/*" onChange={handleRoomImageChange} className="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
-                    <span className="d-block fw-semibold">Choose room image</span>
-                    <span className="d-block small text-white-50">JPG, PNG, or WebP</span>
-                  </label>
-
-                  <div className="row g-2">
-                    <div className="col-6">
-                      <input type="text" className="form-control form-control-lg" placeholder="Room hint" value={roomHint} onChange={(e) => setRoomHint(e.target.value)} />
-                    </div>
-                    <div className="col-6">
-                      <input type="text" className="form-control form-control-lg" placeholder="Style hint" value={styleHint} onChange={(e) => setStyleHint(e.target.value)} />
-                    </div>
-                  </div>
-
-                  <input type="number" min="0" className="form-control form-control-lg" placeholder="Budget (optional)" value={budget} onChange={(e) => setBudget(e.target.value)} />
-
-                  <button className="btn btn-primary btn-lg py-3" type="submit" disabled={analyzingRoom}>
-                    {analyzingRoom ? 'Analyzing...' : 'Analyze Room'}
-                  </button>
-                </form>
-              </div>
-            </div>
-
-            <div className="col-lg-7">
-              <div className="rounded-4 border p-3 p-md-4 h-100" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <h3 className="h4 text-white mb-1">Latest analysis</h3>
-                    <p className="text-white-50 mb-0">Detections, room type, and ranked furniture picks</p>
-                  </div>
-                  {roomAnalysis?.room_type && (
-                    <div className="badge rounded-pill text-bg-info text-dark px-3 py-2">
-                      {roomAnalysis.room_type.replace('_', ' ')}
-                    </div>
-                  )}
-                </div>
-
-                <div className="rounded-4 overflow-hidden border mb-4" style={{ minHeight: '320px', background: 'rgba(15,23,42,0.86)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                  {roomPreviewUrl ? (
-                    <img src={roomPreviewUrl} alt="Room preview" className="w-100 h-100" style={{ objectFit: 'cover', minHeight: '320px' }} />
-                  ) : (
-                    <div className="d-flex align-items-center justify-content-center h-100 p-5 text-center text-white-50">
-                      Upload a room image here to see the analysis result without leaving the home page.
-                    </div>
-                  )}
-                </div>
-
-                <div className="row g-3">
-                  {(roomAnalysis?.recommendations || recommendations.slice(0, 3)).map((item, index) => {
-                    const score = Number(item.score || item.knn_score || 0);
-                    return (
-                      <div key={`${item.product_id || item.id}-${index}`} className="col-md-4">
-                        <div className="rounded-4 border h-100 p-3" style={{ background: 'rgba(15,23,42,0.72)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                          <img
-                            src={resolveMediaUrl(item.image_url) || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop'}
-                            alt={item.name}
-                            className="w-100 rounded-3 mb-3"
-                            style={{ aspectRatio: '4 / 3', objectFit: 'cover' }}
-                          />
-                          <div className="text-white-50 small mb-1">{item.category || 'Furniture'}</div>
-                          <h4 className="h6 text-white mb-2">{item.name}</h4>
-                          <div className="d-flex justify-content-between align-items-center">
-                            <span className="text-info fw-bold">₹{Math.round(Number(item.price || 0))}</span>
-                            <span className="badge text-bg-secondary">{score.toFixed(2)}</span>
-                          </div>
-                        </div>
-                      </div>
-                    );
-                  })}
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-
-      {/* Featured Products */}
-      <section className="py-5">
-        <div className="container">
-          <div className="text-center mb-5">
-            <h2 className="fw-bold">Featured Products</h2>
-            <p className="text-muted">Handpicked favorites from our collection</p>
-          </div>
-          <div className="row g-4">
-            {Array.isArray(products) && products.length > 0 ? (
-              products.slice(0, 8).map(product => (
-                <div key={product.id} className="col-6 col-md-6 col-lg-3">
-                  <ProductCard product={product} />
-                </div>
-              ))
-            ) : (
-              <div className="col-12 text-center">
-                <div className="alert alert-warning">
-                  <i className="fas fa-exclamation-triangle me-2"></i>
-                  No products available. Please start the backend server.
-                </div>
-              </div>
-            )}
-          </div>
-          <div className="text-center mt-5">
-            <Link to="/products" className="btn btn-primary btn-lg px-5">
-              View All Products <i className="fas fa-arrow-right ms-2"></i>
-            </Link>
-          </div>
-        </div>
-      </section>
-
-
     </div>
   );
 };

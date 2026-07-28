@@ -757,6 +757,12 @@ def admin_create_product(request):
             image_url=request.data.get('image_url', ''),
             available=True
         )
+
+        if request.FILES.get('image'):
+            product.image = request.FILES['image']
+        if request.FILES.get('model_file'):
+            product.model_file = request.FILES['model_file']
+        product.save()
         
         serializer = ProductSerializer(product)
         return Response(serializer.data, status=status.HTTP_201_CREATED)
@@ -792,6 +798,10 @@ def admin_update_product(request, product_id):
         product.description = request.data.get('description', product.description)
         product.stock = int(request.data.get('stock', product.stock))
         product.image_url = request.data.get('image_url', product.image_url)
+        if request.FILES.get('image'):
+            product.image = request.FILES['image']
+        if request.FILES.get('model_file'):
+            product.model_file = request.FILES['model_file']
         
         # Update category
         if 'category' in request.data:
