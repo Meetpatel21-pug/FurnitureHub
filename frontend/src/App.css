@@ -2088,6 +2088,102 @@ body[data-theme='dark'] .testimonial-name {
   background: var(--bg-base);
 }
 
+.room-ai-section {
+  min-height: 100vh;
+  padding: 120px 0 64px;
+  background: var(--bg-base);
+}
+
+.room-ai-hero,
+.room-ai-results {
+  display: grid;
+  gap: 24px;
+}
+
+.room-ai-hero {
+  grid-template-columns: minmax(0, 7fr) minmax(320px, 5fr);
+  align-items: stretch;
+}
+
+.room-ai-results {
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+
+.room-ai-card {
+  height: 100%;
+  background: var(--bg-white);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  box-shadow: var(--shadow-sm);
+}
+
+.room-ai-eyebrow {
+  letter-spacing: 0.18em;
+  color: var(--accent);
+}
+
+.room-ai-title {
+  color: var(--ink);
+}
+
+.room-ai-description,
+.room-ai-muted {
+  color: var(--ink-muted);
+}
+
+.room-ai-file-picker {
+  color: var(--ink);
+  background: var(--bg-surface);
+  border: 1px dashed var(--accent-light);
+}
+
+.room-ai-file-picker:hover {
+  color: var(--ink);
+  background: var(--accent-bg);
+  border-color: var(--accent);
+}
+
+.room-ai-section .form-control {
+  color: var(--ink);
+  background: var(--bg-white);
+  border-color: var(--border);
+}
+
+.room-ai-section .form-control::placeholder {
+  color: var(--ink-light);
+}
+
+body[data-theme='light'] .room-ai-section .text-white {
+  color: var(--ink) !important;
+}
+
+body[data-theme='light'] .room-ai-section .text-white-50 {
+  color: var(--ink-muted) !important;
+}
+
+body[data-theme='light'] .room-ai-section .rounded-4.border,
+body[data-theme='light'] .room-ai-section .rounded-3.border {
+  background: var(--bg-white) !important;
+  border-color: var(--border) !important;
+}
+
+body[data-theme='light'] .room-ai-section .btn-outline-light {
+  color: var(--ink);
+  border-color: var(--border);
+}
+
+body[data-theme='light'] .room-ai-section .btn-outline-light:hover {
+  color: var(--ink);
+  background: var(--bg-surface);
+}
+
+@media (max-width: 991px) {
+  .room-ai-hero,
+  .room-ai-results {
+    grid-template-columns: 1fr;
+  }
+}
+
 /* ── Products Page ───────────────────────────────────────── */
 .products-page {
   min-height: 100vh;

@@ -87,34 +87,27 @@ const RoomAnalyzer = () => {
 
   return (
     <div className="room-ai-page">
-      <section
-        style={{
-          minHeight: '100vh',
-          paddingTop: '120px',
-          paddingBottom: '64px',
-          background: 'radial-gradient(circle at top left, rgba(102,126,234,0.22), transparent 32%), radial-gradient(circle at top right, rgba(255,142,162,0.18), transparent 24%), linear-gradient(180deg, #09111f 0%, #0f172a 48%, #111827 100%)',
-        }}
-      >
+      <section className="room-ai-section">
         <div className="container">
-          <div className="row align-items-center g-4 mb-5">
-            <div className="col-lg-7">
-              <div className="p-4 p-md-5 rounded-4 border" style={{ background: 'rgba(15,23,42,0.78)', borderColor: 'rgba(255,255,255,0.08)' }}>
-                <p className="text-uppercase fw-semibold mb-2" style={{ letterSpacing: '0.18em', color: '#8bd3ff' }}>
+          <div className="room-ai-hero mb-5">
+            <div className="room-ai-intro">
+              <div className="room-ai-card p-4 p-md-5">
+                <p className="room-ai-eyebrow text-uppercase fw-semibold mb-2">
                   AI ROOM ANALYZER
                 </p>
-                <h1 className="display-5 fw-bold text-white mb-3">Upload a room photo and get furniture suggestions instantly.</h1>
-                <p className="lead text-white-50 mb-0">
+                <h1 className="room-ai-title display-5 fw-bold mb-3">Upload a room photo and get furniture suggestions instantly.</h1>
+                <p className="room-ai-description lead mb-0">
                   The analyzer detects existing furniture, classifies the room type, and ranks matching products from the catalog with visual previews.
                 </p>
               </div>
             </div>
-            <div className="col-lg-5">
-              <div className="p-4 rounded-4 border h-100" style={{ background: 'rgba(255,255,255,0.06)', borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div className="room-ai-upload">
+              <div className="room-ai-card p-4 h-100">
                 <form onSubmit={handleSubmit} className="d-grid gap-3">
-                  <label className="btn btn-outline-light btn-lg py-3 text-start position-relative overflow-hidden" style={{ borderStyle: 'dashed' }}>
+                  <label className="room-ai-file-picker btn btn-lg py-3 text-start position-relative overflow-hidden">
                     <input type="file" accept="image/*" onChange={handleFileChange} className="position-absolute top-0 start-0 w-100 h-100 opacity-0" />
                     <span className="d-block fw-semibold">Choose room image</span>
-                    <span className="d-block small text-white-50">JPG, PNG, or WebP</span>
+                    <span className="room-ai-muted d-block small">JPG, PNG, or WebP</span>
                   </label>
 
                   <div className="row g-2">
@@ -155,9 +148,9 @@ const RoomAnalyzer = () => {
             </div>
           </div>
 
-          <div className="row g-4">
-            <div className="col-lg-6">
-              <div className="rounded-4 border p-3 p-md-4 h-100" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
+          <div className="room-ai-results">
+            <div>
+              <div className="room-ai-card rounded-4 p-3 p-md-4 h-100">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
                     <h3 className="h4 text-white mb-1">Room preview</h3>
@@ -195,8 +188,8 @@ const RoomAnalyzer = () => {
               </div>
             </div>
 
-            <div className="col-lg-6">
-              <div className="rounded-4 border p-3 p-md-4 h-100" style={{ background: 'rgba(255,255,255,0.05)', borderColor: 'rgba(255,255,255,0.08)' }}>
+            <div>
+              <div className="room-ai-card rounded-4 p-3 p-md-4 h-100">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
                     <h3 className="h4 text-white mb-1">Suggested furniture</h3>
