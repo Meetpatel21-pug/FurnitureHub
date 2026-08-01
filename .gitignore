@@ -91,7 +91,7 @@ pip-log.txt
 pip-delete-this-directory.txt
 
 # DB
-*.sqlite3
+
 
 # Django media / local settings
 backend/local_settings.py
