@@ -3,6 +3,7 @@ from rest_framework_simplejwt.views import TokenRefreshView
 from . import views
 
 urlpatterns = [
+    path('ai/chat/', views.chat_with_furnibot, name='ai-chat'),
     # Authentication
     path('auth/register/', views.register, name='register'),
     path('auth/login/', views.login, name='login'),
@@ -63,6 +64,5 @@ urlpatterns = [
     path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='admin-delete-user'),
     path('admin/wishlists/<int:wishlist_id>/delete/', views.admin_remove_wishlist, name='admin-remove-wishlist'),
 ]
-
 
 

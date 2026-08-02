@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef, useCallback } from 'react';
+import api from '../services/api';
 
 /* ──────────────────────────────────────────────────────────
    Gemini API key — set REACT_APP_GEMINI_API_KEY in .env.local
@@ -98,50 +99,37 @@ const ChatBot = ({ showAfterScroll = false }) => {
     setLoading(true);
 
     try {
-      if (!API_KEY) throw new Error('No API key');
-
-      /* Build history (exclude welcome msg) */
-      const history = messages
-        .filter(m => m.id !== 'welcome')
-        .map(m => ({
-          role: m.role === 'assistant' ? 'model' : 'user',
-          parts: [{ text: m.text }],
-        }));
-
-      const res = await fetch(
-        `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.0-flash:generateContent?key=${API_KEY}`,
-        {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            system_instruction: { parts: [{ text: SYSTEM_PROMPT }] },
-            contents: [
-              ...history,
-              { role: 'user', parts: [{ text }] },
-            ],
-            generationConfig: { maxOutputTokens: 350, temperature: 0.7 },
-          }),
-        }
-      );
-
-      if (!res.ok) {
-        const errorData = await res.json().catch(() => ({}));
-        console.error('Gemini API Error:', errorData);
-        throw new Error(errorData.error?.message || `HTTP ${res.status}`);
+      {
+        const history = messages
+          .filter(m => m.id !== 'welcome')
+          .map(m => ({ role: m.role, content: m.text }));
+        const { data } = await api.post('/ai/chat/', { message: text, history });
+        const reply = data.reply || "I'm having trouble right now. Please try again!";
+        setMessages(prev => [...prev, { role: 'assistant', id: Date.now() + 1, text: reply }]);
+        return;
       }
 
-      const data = await res.json();
-      const reply =
-        data.candidates?.[0]?.content?.parts?.[0]?.text ||
+      /* Legacy client-side Gemini request removed: xAI is called by Django. */
+      /*
+      const unusedReply =
+        ({}).candidates?.[0]?.content?.parts?.[0]?.text ||
         "I'm having trouble right now. Please try again! 🛋️";
 
-      setMessages(prev => [...prev, { role: 'assistant', id: Date.now() + 1, text: reply }]);
+      setMessages(prev => [...prev, { role: 'assistant', id: Date.now() + 1, text: unusedReply }]);
+      */
     } catch (err) {
       console.error('ChatBot Error:', err);
+      {
+        const detail = err.response?.data?.error || err.message || 'Please try again in a moment!';
+        setMessages(prev => [...prev, { role: 'assistant', id: Date.now() + 1, text: `Connection Error: ${detail}` }]);
+        return;
+      }
+      /*
       const errMsg = !API_KEY
         ? '⚠️ API key not set. Add REACT_APP_GEMINI_API_KEY to your .env.local file.'
         : `⚠️ Connection Error: ${err.message || 'Please try again in a moment!'}`;
       setMessages(prev => [...prev, { role: 'assistant', id: Date.now() + 1, text: errMsg }]);
+      */
     } finally {
       setLoading(false);
     }
@@ -242,7 +230,7 @@ const ChatBot = ({ showAfterScroll = false }) => {
             }
           </button>
         </div>
-        <div className="chatbot-powered">Powered by Gemini AI</div>
+        <div className="chatbot-powered">Powered by xAI</div>
       </div>
 
       {/* ── FAB Toggle ── */}

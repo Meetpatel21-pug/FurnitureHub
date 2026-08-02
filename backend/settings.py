@@ -1,6 +1,7 @@
 import os
 from pathlib import Path
 from datetime import timedelta
+from decouple import config
 
 BASE_DIR = Path(__file__).resolve().parent
 
@@ -96,6 +97,10 @@ ROOM_AI_CNN_CLASSES = [
         'living_room,bedroom,dining_room,office,kitchen'
     ).split(',') if value.strip()
 ]
+
+# Keep xAI credentials on the server, never in the React application.
+XAI_API_KEY = config('XAI_API_KEY', default='')
+XAI_MODEL = config('XAI_MODEL', default='grok-4.3')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
