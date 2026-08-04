@@ -8,6 +8,7 @@ urlpatterns = [
     path('auth/register/', views.register, name='register'),
     path('auth/login/', views.login, name='login'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('first-order-discount/', views.first_order_discount, name='first-order-discount'),
     
     # Categories & Products
     path('categories/', views.CategoryListView.as_view(), name='categories'),
@@ -63,6 +64,7 @@ urlpatterns = [
     path('admin/users/<int:user_id>/update/', views.admin_update_user, name='admin-update-user'),
     path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='admin-delete-user'),
     path('admin/wishlists/<int:wishlist_id>/delete/', views.admin_remove_wishlist, name='admin-remove-wishlist'),
+    path('orders/<str:order_id>/invoice/', views.download_invoice, name='download-invoice'),
 ]
 
 

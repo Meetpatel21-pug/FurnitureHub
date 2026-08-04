@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -14,9 +14,25 @@ const Checkout = () => {
   });
   const [paymentMethod, setPaymentMethod] = useState('cod');
   const [loading, setLoading] = useState(false);
+  const [discount, setDiscount] = useState({ eligible: false, discount_percent: 0 });
   const { isAuthenticated } = useAuth();
   const { cart, clearCart } = useCart();
   const navigate = useNavigate();
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      ordersAPI.getFirstOrderDiscount()
+        .then(res => setDiscount(res.data))
+        .catch(() => {});
+    }
+  }, [isAuthenticated]);
+
+  const subtotal = Number(cart.total_price || 0);
+  const deliveryCharge = 50;
+  const discountAmount = discount.eligible
+    ? parseFloat(((subtotal * discount.discount_percent) / 100).toFixed(2))
+    : 0;
+  const totalAmount = subtotal - discountAmount + deliveryCharge;
 
   const handleChange = (e) => {
     setFormData({
@@ -30,16 +46,13 @@ const Checkout = () => {
     setLoading(true);
 
     try {
-      const subtotal = Number(cart.total_price || 0);
-      const deliveryCharge = 50;
-      const totalAmount = subtotal + deliveryCharge;
-
       const orderData = {
         address: `${formData.address}, ${formData.city}, ${formData.state} - ${formData.pincode}`,
         payment_method: paymentMethod,
         subtotal,
         deliveryCharge,
-        totalAmount
+        totalAmount,
+        discount_percent: discount.eligible ? discount.discount_percent : 0,
       };
       
       const response = await ordersAPI.checkout(orderData);
@@ -53,7 +66,6 @@ const Checkout = () => {
         }
         navigate('/orders');
       } else {
-        // Navigate to payment confirmation page with order data
         navigate('/payment-confirmation', { 
           state: { 
             orderData: {
@@ -341,6 +353,13 @@ const Checkout = () => {
                   <h4 className="text-dark mb-4">
                     <i className="fas fa-receipt me-2"></i>Order Summary
                   </h4>
+
+                  {discount.eligible && (
+                    <div className="alert alert-success py-2 mb-3">
+                      <i className="fas fa-tag me-2"></i>
+                      <strong>🎉 First Order! {discount.discount_percent}% off applied</strong>
+                    </div>
+                  )}
                   
                   <div className="order-items mb-4">
                     {cart.items?.map(item => (
@@ -359,15 +378,21 @@ const Checkout = () => {
                   <div className="summary-totals">
                     <div className="d-flex justify-content-between mb-2">
                       <span className="text-dark">Subtotal:</span>
-                      <span className="text-dark">₹{parseFloat(cart.total_price || 0).toFixed(0)}</span>
+                      <span className="text-dark">₹{subtotal.toFixed(0)}</span>
                     </div>
+                    {discount.eligible && (
+                      <div className="d-flex justify-content-between mb-2 text-success">
+                        <span>Discount ({discount.discount_percent}%):</span>
+                        <span>- ₹{discountAmount.toFixed(0)}</span>
+                      </div>
+                    )}
                     <div className="d-flex justify-content-between mb-2">
-                      <span className="text-dark">Shipping:</span>
-                      <span className="text-success">Free</span>
+                      <span className="text-dark">Delivery:</span>
+                      <span className="text-dark">₹{deliveryCharge}</span>
                     </div>
                     <div className="d-flex justify-content-between mb-3 pt-2 border-top">
                       <h5 className="text-dark">Total:</h5>
-                      <h4 className="text-success fw-bold">₹{parseFloat(cart.total_price || 0).toFixed(0)}</h4>
+                      <h4 className="text-success fw-bold">₹{totalAmount.toFixed(0)}</h4>
                     </div>
                   </div>
                   

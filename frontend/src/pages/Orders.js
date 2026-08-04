@@ -32,12 +32,27 @@ const Orders = () => {
     if (window.confirm('Are you sure you want to cancel this order?')) {
       try {
         await ordersAPI.cancelOrder(orderId);
-        // Refresh orders after cancellation
         fetchOrders();
       } catch (error) {
         console.error('Error cancelling order:', error);
         alert(error.response?.data?.error || 'Failed to cancel order');
       }
+    }
+  };
+
+  const handleDownloadInvoice = async (orderId) => {
+    try {
+      const response = await ordersAPI.downloadInvoice(orderId);
+      const url = window.URL.createObjectURL(new Blob([response.data], { type: 'application/pdf' }));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `invoice_${orderId}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (error) {
+      alert('Failed to download invoice');
     }
   };
 
@@ -206,6 +221,14 @@ const Orders = () => {
                                 ₹{parseFloat(order.total_amount).toFixed(0)}
                               </h4>
                             </div>
+                            <button
+                              className="btn btn-outline-success w-100 mb-2"
+                              onClick={() => handleDownloadInvoice(order.order_id)}
+                              disabled={!['confirmed', 'shipped', 'delivered'].includes(order.status)}
+                            >
+                              <i className="fas fa-file-pdf me-2"></i>
+                              Download Invoice
+                            </button>
                             <button 
                               className="btn btn-danger w-100" 
                               onClick={() => handleCancelOrder(order.order_id)}

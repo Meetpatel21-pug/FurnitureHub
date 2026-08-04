@@ -9,16 +9,28 @@ from django.contrib.auth import authenticate
 from django.db.models import Q
 from django.shortcuts import get_object_or_404
 from django.contrib.auth.models import User
+from django.http import HttpResponse
 from decimal import Decimal
+from pathlib import Path
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
 import smtplib
 import ssl
+import os
 import uuid
 import json
 import logging
 from urllib.error import HTTPError, URLError
 from urllib.request import Request, urlopen
+from reportlab.lib.pagesizes import A4
+from reportlab.lib import colors
+from reportlab.lib.units import mm
+from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer, HRFlowable
+from reportlab.lib.styles import getSampleStyleSheet, ParagraphStyle
+from reportlab.lib.enums import TA_CENTER, TA_RIGHT, TA_LEFT
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+import io
 
 try:
     import truststore
@@ -35,6 +47,25 @@ from .room_ai import analyze_room_image
 
 DELIVERY_CHARGE = Decimal('50.00')
 logger = logging.getLogger(__name__)
+
+
+def _get_invoice_font_names():
+    font_dir = Path(os.environ.get('WINDIR', r'C:\Windows')) / 'Fonts'
+    regular_path = font_dir / 'segoeui.ttf'
+    bold_path = font_dir / 'segoeuib.ttf'
+
+    if regular_path.exists():
+        regular_font = 'InvoiceSegoeUI'
+        bold_font = 'InvoiceSegoeUI-Bold' if bold_path.exists() else regular_font
+
+        if regular_font not in pdfmetrics.getRegisteredFontNames():
+            pdfmetrics.registerFont(TTFont(regular_font, str(regular_path)))
+        if bold_path.exists() and bold_font not in pdfmetrics.getRegisteredFontNames():
+            pdfmetrics.registerFont(TTFont(bold_font, str(bold_path)))
+
+        return regular_font, bold_font
+
+    return 'Helvetica', 'Helvetica-Bold'
 
 CHAT_SYSTEM_PROMPT = """You are FurniBot, the friendly AI assistant for FurnitureHub, a premium online furniture store.
 
@@ -141,6 +172,120 @@ def chat_with_furnibot(request):
     except Exception:
         logger.exception('Unexpected xAI chat service failure')
         return Response({'reply': _build_fallback_reply(message)})
+
+
+def _build_invoice_pdf(order):
+    """Return a BytesIO buffer containing the invoice PDF for the given order."""
+    order_items = order.items.select_related('product').all()
+    subtotal = sum((item.get_cost() for item in order_items), Decimal('0.00'))
+    delivery_charge = max(order.total_amount - subtotal, Decimal('0.00'))
+    customer_name = f"{order.user.first_name} {order.user.last_name}".strip() or order.user.username
+    payment_method_label = dict(Order.PAYMENT_METHOD_CHOICES).get(order.payment_method, order.payment_method)
+    body_font, bold_font = _get_invoice_font_names()
+
+    buffer = io.BytesIO()
+    doc = SimpleDocTemplate(buffer, pagesize=A4, topMargin=15*mm, bottomMargin=15*mm,
+                            leftMargin=20*mm, rightMargin=20*mm)
+    teal = colors.HexColor('#0f766e')
+    dark = colors.HexColor('#111827')
+    muted = colors.HexColor('#6b7280')
+
+    title_style = ParagraphStyle('title', fontSize=22, textColor=colors.white,
+                                  fontName=bold_font, alignment=TA_LEFT)
+    label_style = ParagraphStyle('label', fontSize=9, textColor=muted, fontName=body_font)
+    value_style = ParagraphStyle('value', fontSize=9, textColor=dark, fontName=bold_font,
+                                  alignment=TA_RIGHT)
+    normal = ParagraphStyle('normal', fontSize=9, textColor=dark, fontName=body_font)
+    footer_style = ParagraphStyle('footer', fontSize=8, textColor=muted,
+                                   fontName=body_font, alignment=TA_CENTER)
+
+    elements = []
+
+    header_data = [[Paragraph('FurnitureZone', title_style),
+                    Paragraph('TAX INVOICE', ParagraphStyle('inv', fontSize=11,
+                              textColor=colors.HexColor('#ccfbf1'), fontName=bold_font,
+                              alignment=TA_RIGHT))]]
+    header_table = Table(header_data, colWidths=[110*mm, 60*mm])
+    header_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, -1), teal),
+        ('TOPPADDING', (0, 0), (-1, -1), 12), ('BOTTOMPADDING', (0, 0), (-1, -1), 12),
+        ('LEFTPADDING', (0, 0), (0, -1), 10), ('RIGHTPADDING', (-1, 0), (-1, -1), 10),
+        ('VALIGN', (0, 0), (-1, -1), 'MIDDLE'),
+    ]))
+    elements.append(header_table)
+    elements.append(Spacer(1, 6*mm))
+
+    meta_data = [
+        [Paragraph('Order ID', label_style), Paragraph(order.order_id, value_style)],
+        [Paragraph('Order Date', label_style), Paragraph(order.created_at.strftime('%d %b %Y, %I:%M %p'), value_style)],
+        [Paragraph('Customer', label_style), Paragraph(customer_name, value_style)],
+        [Paragraph('Payment Method', label_style), Paragraph(payment_method_label, value_style)],
+        [Paragraph('Payment Status', label_style), Paragraph(order.payment_status.title(), value_style)],
+        [Paragraph('Order Status', label_style), Paragraph(order.status.title(), value_style)],
+    ]
+    meta_table = Table(meta_data, colWidths=[80*mm, 90*mm])
+    meta_table.setStyle(TableStyle([
+        ('LINEBELOW', (0, 0), (-1, -2), 0.3, colors.HexColor('#e5e7eb')),
+        ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+    ]))
+    elements.append(meta_table)
+    elements.append(Spacer(1, 4*mm))
+
+    elements.append(Paragraph('Shipping Address', label_style))
+    elements.append(Spacer(1, 1*mm))
+    elements.append(Paragraph(order.shipping_address.replace('\n', ', '), normal))
+    elements.append(Spacer(1, 5*mm))
+    elements.append(HRFlowable(width='100%', thickness=0.5, color=colors.HexColor('#e5e7eb')))
+    elements.append(Spacer(1, 4*mm))
+
+    item_header = [[
+        Paragraph('<b>Item</b>', normal),
+        Paragraph('<b>Qty</b>', ParagraphStyle('c', fontSize=9, fontName=bold_font, alignment=TA_CENTER)),
+        Paragraph('<b>Unit Price</b>', ParagraphStyle('r', fontSize=9, fontName=bold_font, alignment=TA_RIGHT)),
+        Paragraph('<b>Total</b>', ParagraphStyle('r', fontSize=9, fontName=bold_font, alignment=TA_RIGHT)),
+    ]]
+    item_rows = [
+        [
+            Paragraph(item.product.name, normal),
+            Paragraph(str(item.quantity), ParagraphStyle('c', fontSize=9, fontName=body_font, alignment=TA_CENTER)),
+            Paragraph(f'\u20b9{item.price:.2f}', ParagraphStyle('r', fontSize=9, fontName=body_font, alignment=TA_RIGHT)),
+            Paragraph(f'\u20b9{item.get_cost():.2f}', ParagraphStyle('r', fontSize=9, fontName=body_font, alignment=TA_RIGHT)),
+        ]
+        for item in order_items
+    ]
+    items_table = Table(item_header + item_rows, colWidths=[90*mm, 20*mm, 35*mm, 35*mm])
+    items_table.setStyle(TableStyle([
+        ('BACKGROUND', (0, 0), (-1, 0), colors.HexColor('#f0fdfa')),
+        ('LINEBELOW', (0, 0), (-1, 0), 1, teal),
+        ('LINEBELOW', (0, 1), (-1, -1), 0.3, colors.HexColor('#e5e7eb')),
+        ('TOPPADDING', (0, 0), (-1, -1), 6), ('BOTTOMPADDING', (0, 0), (-1, -1), 6),
+        ('LEFTPADDING', (0, 0), (0, -1), 4),
+    ]))
+    elements.append(items_table)
+    elements.append(Spacer(1, 5*mm))
+
+    totals_data = [
+        [Paragraph('Subtotal', label_style), Paragraph(f'\u20b9{subtotal:.2f}', value_style)],
+        [Paragraph('Delivery Charge', label_style), Paragraph(f'\u20b9{delivery_charge:.2f}', value_style)],
+        [Paragraph('<b>Grand Total</b>', ParagraphStyle('bold', fontSize=10, fontName=bold_font, textColor=dark)),
+         Paragraph(f'<b>\u20b9{order.total_amount:.2f}</b>',
+               ParagraphStyle('boldR', fontSize=11, fontName=bold_font, textColor=teal, alignment=TA_RIGHT))],
+    ]
+    totals_table = Table(totals_data, colWidths=[130*mm, 40*mm])
+    totals_table.setStyle(TableStyle([
+        ('LINEABOVE', (0, 2), (-1, 2), 1, colors.HexColor('#e5e7eb')),
+        ('TOPPADDING', (0, 0), (-1, -1), 5), ('BOTTOMPADDING', (0, 0), (-1, -1), 5),
+        ('ALIGN', (-1, 0), (-1, -1), 'RIGHT'),
+    ]))
+    elements.append(totals_table)
+    elements.append(Spacer(1, 8*mm))
+    elements.append(HRFlowable(width='100%', thickness=0.5, color=colors.HexColor('#e5e7eb')))
+    elements.append(Spacer(1, 4*mm))
+    elements.append(Paragraph('Thank you for shopping with FurnitureZone!', footer_style))
+
+    doc.build(elements)
+    buffer.seek(0)
+    return buffer
 
 
 def send_order_confirmation_email(order):
@@ -277,24 +422,38 @@ We’ll send another update when your order ships.
 """
 
     def _send_with_context(tls_context):
-        message = MIMEMultipart('alternative')
-        message['Subject'] = subject
-        message['From'] = settings.DEFAULT_FROM_EMAIL
-        message['To'] = recipient_email
-        message.attach(MIMEText(plain_message, 'plain'))
-        message.attach(MIMEText(html_message, 'html'))
+        from email.mime.base import MIMEBase
+        from email import encoders
+
+        outer = MIMEMultipart('mixed')
+        outer['Subject'] = subject
+        outer['From'] = settings.DEFAULT_FROM_EMAIL
+        outer['To'] = recipient_email
+
+        alt = MIMEMultipart('alternative')
+        alt.attach(MIMEText(plain_message, 'plain', 'utf-8'))
+        alt.attach(MIMEText(html_message, 'html', 'utf-8'))
+        outer.attach(alt)
+
+        # Attach PDF invoice
+        try:
+            pdf_buffer = _build_invoice_pdf(order)
+            pdf_part = MIMEBase('application', 'pdf')
+            pdf_part.set_payload(pdf_buffer.read())
+            encoders.encode_base64(pdf_part)
+            pdf_part.add_header('Content-Disposition', f'attachment; filename="invoice_{order.order_id}.pdf"')
+            outer.attach(pdf_part)
+        except Exception as pdf_exc:
+            print(f'Could not attach PDF for {order.order_id}: {pdf_exc}')
 
         with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=30) as server:
             server.ehlo()
-
             if settings.EMAIL_USE_TLS:
                 server.starttls(context=tls_context)
                 server.ehlo()
-
             if settings.EMAIL_HOST_USER and settings.EMAIL_HOST_PASSWORD:
                 server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
-
-            server.sendmail(settings.DEFAULT_FROM_EMAIL, [recipient_email], message.as_string())
+            server.sendmail(settings.DEFAULT_FROM_EMAIL, [recipient_email], outer.as_string())
 
     try:
         _send_with_context(ssl.create_default_context())
@@ -314,6 +473,17 @@ We’ll send another update when your order ships.
             'recipient_email': recipient_email,
             'error': str(exc),
         }
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def first_order_discount(request):
+    import random
+    has_orders = Order.objects.filter(user=request.user).exclude(status='cancelled').exists()
+    if has_orders:
+        return Response({'eligible': False, 'discount_percent': 0})
+    discount = random.choice([10, 12, 15])
+    return Response({'eligible': True, 'discount_percent': discount})
+
 
 # Authentication Views
 @api_view(['POST'])
@@ -517,7 +687,16 @@ def checkout(request):
             }, status=status.HTTP_400_BAD_REQUEST)
     
     subtotal = sum(item.get_cost() for item in cart_items)
-    total = subtotal + DELIVERY_CHARGE
+
+    # Apply first-order discount if eligible
+    discount_percent = Decimal('0')
+    requested_discount = Decimal(str(request.data.get('discount_percent', 0)))
+    has_previous_orders = Order.objects.filter(user=request.user).exclude(status='cancelled').exists()
+    if not has_previous_orders and requested_discount in [Decimal('10'), Decimal('12'), Decimal('15')]:
+        discount_percent = requested_discount
+
+    discount_amount = (subtotal * discount_percent / Decimal('100')).quantize(Decimal('0.01'))
+    total = subtotal - discount_amount + DELIVERY_CHARGE
     
     # Get payment method from request data
     payment_method = request.data.get('payment_method', 'cod')
@@ -1165,3 +1344,13 @@ def admin_remove_wishlist(request, wishlist_id):
         return Response({'message': 'Wishlist item removed successfully'})
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def download_invoice(request, order_id):
+    order = get_object_or_404(Order, order_id=order_id, user=request.user)
+    buffer = _build_invoice_pdf(order)
+    response = HttpResponse(buffer, content_type='application/pdf')
+    response['Content-Disposition'] = f'attachment; filename="invoice_{order.order_id}.pdf"'
+    return response

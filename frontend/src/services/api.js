@@ -74,6 +74,8 @@ export const ordersAPI = {
   getDetail: (orderId) => api.get(`/orders/${orderId}/`),
   cancelOrder: (orderId) => api.post(`/orders/${orderId}/cancel/`),
   updatePaymentStatus: (orderId, status) => api.post(`/orders/${orderId}/payment/`, { payment_status: status }),
+  downloadInvoice: (orderId) => api.get(`/orders/${orderId}/invoice/`, { responseType: 'blob' }),
+  getFirstOrderDiscount: () => api.get('/first-order-discount/'),
 };
 
 export const reviewsAPI = {
