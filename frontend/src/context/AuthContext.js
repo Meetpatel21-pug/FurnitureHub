@@ -63,6 +63,20 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const resetPassword = async (data) => {
+    try {
+      const response = await authAPI.confirmPasswordReset(data);
+      const { user, access, refresh } = response.data;
+      sessionStorage.setItem('access_token', access);
+      sessionStorage.setItem('refresh_token', refresh);
+      sessionStorage.setItem('user', JSON.stringify(user));
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      return { success: false, error: error.response?.data?.error || 'Unable to reset password' };
+    }
+  };
+
   const logout = () => {
     authAPI.logout();
     setUser(null);
@@ -72,6 +86,7 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     register,
+    resetPassword,
     logout,
     loading,
     isAuthenticated: !!user

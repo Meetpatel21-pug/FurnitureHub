@@ -1,152 +1,141 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
+import { toast } from 'react-toastify';
+
+const contactOptions = [
+  {
+    icon: 'fa-location-dot',
+    title: 'Visit the showroom',
+    detail: 'LJU College Campus, Ahmedabad',
+    meta: 'Gujarat 380015',
+  },
+  {
+    icon: 'fa-phone-volume',
+    title: 'Speak with our team',
+    detail: '+91 12345 67890',
+    meta: 'Mon–Sat, 9:00 AM – 8:00 PM',
+    href: 'tel:+911234567890',
+  },
+  {
+    icon: 'fa-envelope',
+    title: 'Send an email',
+    detail: 'support@furniturezone.com',
+    meta: 'A reply within one business day',
+    href: 'mailto:support@furniturezone.com',
+  },
+];
 
 const Contact = () => {
+  const handleSubmit = (event) => {
+    event.preventDefault();
+    toast.success('Thanks for reaching out! Our team will get back to you soon.');
+    event.currentTarget.reset();
+  };
+
   return (
-    <div>
-      {/* Hero Section */}
-      <div id="contactCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
-        <div className="carousel-inner">
-          <div className="carousel-item active">
-            <div className="hero-slide" style={{
-              backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(https://images.unsplash.com/photo-1497366216548-37526070297c?w=1920&h=800&fit=crop)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              height: '85vh',
-              display: 'flex',
-              alignItems: 'center'
-            }}>
-              <div className="container text-center text-white">
-                <h1 className="display-2 fw-bold mb-4">Contact Us</h1>
-                <p className="lead mb-5">Get in touch with our furniture experts</p>
-                <Link to="/products" className="btn btn-primary btn-lg px-5 py-3">
-                  Browse Products <i className="fas fa-arrow-right ms-2"></i>
-                </Link>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      {/* Contact Information */}
-      <section className="py-5 bg-light">
+    <main className="contact-page">
+      <section className="contact-hero">
         <div className="container">
-          <div className="text-center mb-5 animate__animated animate__fadeInUp">
-            <h2 className="fw-bold text-dark">Get In Touch</h2>
-            <p className="text-muted">We'd love to hear from you</p>
+          <div className="contact-hero__content">
+            <span className="contact-eyebrow"><i className="fas fa-sparkles"></i> Here when you need us</span>
+            <h1>Let’s make your space feel like home.</h1>
+            <p>Whether you need product advice, delivery help, or design guidance, our furniture specialists are ready to help.</p>
+            <div className="contact-hero__actions">
+              <a href="#contact-form" className="contact-primary-button">Send a message <i className="fas fa-arrow-right"></i></a>
+              <Link to="/products" className="contact-secondary-button">Explore furniture</Link>
+            </div>
           </div>
-          <div className="row g-4">
-            <div className="col-lg-4">
-              <div className="modern-product-card text-center h-100 animate__animated animate__fadeInUp animate__delay-1s">
-                <div className="mb-3">
-                  <i className="fas fa-store fa-3x text-primary"></i>
-                </div>
-                <div className="product-content">
-                  <h4 className="product-title" style={{color: '#333'}}>Visit Our Store</h4>
-                  <p className="text-dark">LJU College Campus<br/>Ahmedabad, Gujarat 380015</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4">
-              <div className="modern-product-card text-center h-100 animate__animated animate__fadeInUp animate__delay-2s">
-                <div className="mb-3">
-                  <i className="fas fa-phone-alt fa-3x text-primary"></i>
-                </div>
-                <div className="product-content">
-                  <h4 className="product-title" style={{color: '#333'}}>Call Us</h4>
-                  <p className="text-dark">+91 1234567890<br/>Mon-Sat: 9AM-8PM</p>
-                </div>
-              </div>
-            </div>
-            <div className="col-lg-4">
-              <div className="modern-product-card text-center h-100 animate__animated animate__fadeInUp animate__delay-3s">
-                <div className="mb-3">
-                  <i className="fas fa-envelope-open fa-3x text-primary"></i>
-                </div>
-                <div className="product-content">
-                  <h4 className="product-title" style={{color: '#333'}}>Email Us</h4>
-                  <p className="text-dark">info@furniturezone.com<br/>support@furniturezone.com</p>
-                </div>
-              </div>
+          <div className="contact-hero__panel" aria-label="Customer support availability">
+            <div className="contact-hero__panel-icon"><i className="fas fa-headset"></i></div>
+            <span className="contact-status"><span></span> Support team online</span>
+            <h2>Expert help, thoughtfully delivered.</h2>
+            <p>Connect with a real person for guidance on every room and every detail.</p>
+            <div className="contact-hero__availability">
+              <i className="far fa-clock"></i>
+              <span><strong>Business hours</strong>Monday to Saturday · 9 AM to 8 PM</span>
             </div>
           </div>
         </div>
       </section>
 
-      {/* Contact Form */}
-      <section className="py-5">
+      <section className="contact-details-section">
         <div className="container">
-          <div className="text-center mb-5 animate__animated animate__fadeInUp">
-            <h2 className="fw-bold">Send Us A Message</h2>
-            <p className="text-muted">We'll get back to you within 24 hours</p>
+          <div className="contact-section-heading">
+            <span>Contact options</span>
+            <h2>Choose the way that works for you.</h2>
           </div>
-          <div className="row justify-content-center">
-            <div className="col-lg-8">
-              <div className="modern-product-card animate__animated animate__fadeInUp animate__delay-1s">
-                <div className="product-content">
-                  <form>
-                    <div className="row g-3">
-                      <div className="col-md-6">
-                        <label className="form-label text-dark">First Name</label>
-                        <input type="text" className="form-control border-dark" placeholder="Your first name" style={{color: '#333'}} />
-                      </div>
-                      <div className="col-md-6">
-                        <label className="form-label text-dark">Last Name</label>
-                        <input type="text" className="form-control border-dark" placeholder="Your last name" style={{color: '#333'}} />
-                      </div>
-                      <div className="col-md-6">
-                        <label className="form-label text-dark">Email</label>
-                        <input type="email" className="form-control border-dark" placeholder="your.email@example.com" style={{color: '#333'}} />
-                      </div>
-                      <div className="col-md-6">
-                        <label className="form-label text-dark">Phone</label>
-                        <input type="tel" className="form-control border-dark" placeholder="+91 1234567890" style={{color: '#333'}} />
-                      </div>
-                      <div className="col-12">
-                        <label className="form-label text-dark">Subject</label>
-                        <input type="text" className="form-control border-dark" placeholder="How can we help you?" style={{color: '#333'}} />
-                      </div>
-                      <div className="col-12">
-                        <label className="form-label text-dark">Message</label>
-                        <textarea className="form-control border-dark" rows="5" placeholder="Tell us more about your inquiry..." style={{color: '#333'}}></textarea>
-                      </div>
-                      <div className="col-12 text-center">
-                        <button type="submit" className="btn btn-dark btn-lg px-5 py-3">
-                          <i className="fas fa-paper-plane me-2"></i>Send Message
-                        </button>
-                      </div>
-                    </div>
-                  </form>
-                </div>
+          <div className="contact-options-grid">
+            {contactOptions.map(({ icon, title, detail, meta, href }) => (
+              <div key={title}>
+                <article className="contact-option-card h-100">
+                  <div className="contact-option-card__icon"><i className={`fas ${icon}`}></i></div>
+                  <h3>{title}</h3>
+                  {href ? <a href={href}>{detail}</a> : <p>{detail}</p>}
+                  <small>{meta}</small>
+                </article>
               </div>
-            </div>
+            ))}
           </div>
         </div>
       </section>
 
-      {/* Map Section */}
-      <section className="py-5 bg-light">
+      <section className="contact-form-section" id="contact-form">
         <div className="container">
-          <div className="text-center mb-5 animate__animated animate__fadeInUp">
-            <h2 className="fw-bold text-dark">Find Us</h2>
-            <p className="text-muted">Visit our showroom for the best experience</p>
-          </div>
-          <div className="modern-product-card animate__animated animate__fadeInUp animate__delay-1s">
-            <div className="product-image-container">
-              <iframe
-                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3671.5234567890123!2d72.5234567890123!3d23.0234567890123!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x395e84f5b5b5b5b5%3A0xc5f6c3b7b5b5b5b5!2sLJU%20College%2C%20Ahmedabad%2C%20Gujarat!5e0!3m2!1sen!2sin!4v1635000000000!5m2!1sen!2sin"
-                width="100%"
-                height="400"
-                style={{border: 0, borderRadius: '15px'}}
-                allowFullScreen=""
-                loading="lazy"
-                referrerPolicy="no-referrer-when-downgrade"
-              ></iframe>
+          <div className="row g-5 align-items-start">
+            <div className="col-lg-5">
+              <div className="contact-form-intro">
+                <span className="contact-eyebrow">Send a message</span>
+                <h2>Tell us how we can help.</h2>
+                <p>Share a few details and our team will connect with you within one business day.</p>
+                <div className="contact-response-note">
+                  <i className="fas fa-shield-heart"></i>
+                  <span><strong>Your details stay private.</strong> We only use them to respond to your request.</span>
+                </div>
+              </div>
+            </div>
+            <div className="col-lg-7">
+              <form className="contact-form-card" onSubmit={handleSubmit}>
+                <div className="row g-4">
+                  <div className="col-md-6">
+                    <label htmlFor="firstName">First name</label>
+                    <input id="firstName" name="firstName" type="text" placeholder="Your first name" required />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="lastName">Last name</label>
+                    <input id="lastName" name="lastName" type="text" placeholder="Your last name" required />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="email">Email address</label>
+                    <input id="email" name="email" type="email" placeholder="you@example.com" required />
+                  </div>
+                  <div className="col-md-6">
+                    <label htmlFor="phone">Phone number <span>Optional</span></label>
+                    <input id="phone" name="phone" type="tel" placeholder="+91 12345 67890" />
+                  </div>
+                  <div className="col-12">
+                    <label htmlFor="subject">What can we help with?</label>
+                    <select id="subject" name="subject" defaultValue="">
+                      <option value="" disabled>Select a topic</option>
+                      <option>Product enquiry</option>
+                      <option>Delivery and order support</option>
+                      <option>Design consultation</option>
+                      <option>Other</option>
+                    </select>
+                  </div>
+                  <div className="col-12">
+                    <label htmlFor="message">Your message</label>
+                    <textarea id="message" name="message" rows="5" placeholder="Tell us a little more about what you need..." required></textarea>
+                  </div>
+                  <div className="col-12">
+                    <button type="submit" className="contact-primary-button">Send message <i className="fas fa-paper-plane"></i></button>
+                  </div>
+                </div>
+              </form>
             </div>
           </div>
         </div>
       </section>
-    </div>
+    </main>
   );
 };
 

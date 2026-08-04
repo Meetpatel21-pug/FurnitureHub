@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { productsAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
-import ChatBot from '../components/ChatBot';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -237,7 +236,6 @@ const Products = () => {
         </div>
       </section>
 
-      <ChatBot showAfterScroll={false} />
     </div>
   );
 };

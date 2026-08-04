@@ -111,7 +111,7 @@ const Navbar = () => {
           <div className="mobile-auth-section d-md-none">
             {!isAuthenticated && (
               <div className="auth-buttons">
-                <Link to="/login" className="btn btn-outline-primary" onClick={closeMobileMenu}>Login</Link>
+                <Link to="/login" className="btn auth-login-button" onClick={closeMobileMenu}>Login</Link>
                 <Link to="/register" className="btn btn-primary" onClick={closeMobileMenu}>Sign Up</Link>
               </div>
             )}
@@ -172,7 +172,7 @@ const Navbar = () => {
               <button type="button" className="theme-toggle-btn" onClick={toggleTheme} aria-label="Toggle theme">
                 <i className={`fas ${theme === 'dark' ? 'fa-sun' : 'fa-moon'}`}></i>
               </button>
-              <Link to="/login" className="btn btn-outline-primary btn-sm">Login</Link>
+              <Link to="/login" className="btn auth-login-button btn-sm">Login</Link>
               <Link to="/register" className="btn btn-primary btn-sm">Sign Up</Link>
             </div>
           )}

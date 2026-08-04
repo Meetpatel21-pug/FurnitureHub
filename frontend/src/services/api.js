@@ -42,6 +42,8 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (credentials) => api.post('/auth/login/', credentials),
   register: (userData) => api.post('/auth/register/', userData),
+  requestPasswordReset: (email) => api.post('/auth/password-reset/request/', { email }),
+  confirmPasswordReset: (data) => api.post('/auth/password-reset/confirm/', data),
   logout: () => {
     sessionStorage.removeItem('access_token');
     sessionStorage.removeItem('refresh_token');

@@ -7,6 +7,8 @@ urlpatterns = [
     # Authentication
     path('auth/register/', views.register, name='register'),
     path('auth/login/', views.login, name='login'),
+    path('auth/password-reset/request/', views.request_password_reset, name='password-reset-request'),
+    path('auth/password-reset/confirm/', views.confirm_password_reset, name='password-reset-confirm'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('first-order-discount/', views.first_order_discount, name='first-order-discount'),
     

@@ -1,9 +1,12 @@
 import os
 from pathlib import Path
 from datetime import timedelta
-from decouple import config
+from decouple import AutoConfig
 
 BASE_DIR = Path(__file__).resolve().parent
+# Load secrets from backend/.env regardless of the directory used to start Django.
+# Environment variables still take precedence over values in this file.
+config = AutoConfig(search_path=BASE_DIR)
 
 SECRET_KEY = 'django-insecure-your-secret-key-here'
 DEBUG = True
@@ -100,7 +103,7 @@ ROOM_AI_CNN_CLASSES = [
 
 # Keep xAI credentials on the server, never in the React application.
 XAI_API_KEY = config('XAI_API_KEY', default='')
-XAI_MODEL = config('XAI_MODEL', default='grok-4.3')
+XAI_MODEL = config('XAI_MODEL', default='grok-4.5')
 
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
