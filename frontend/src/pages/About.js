@@ -5,7 +5,7 @@ const About = () => {
   return (
     <div>
       {/* Hero Carousel */}
-      <div id="aboutCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
+      <div id="aboutCarousel" className="carousel slide">
         <div className="carousel-inner">
           <div className="carousel-item active">
             <div className="hero-slide" style={{
@@ -17,7 +17,7 @@ const About = () => {
               alignItems: 'center'
             }}>
               <div className="container text-center text-white">
-                <h1 className="display-2 fw-bold mb-4">About FurnitureHub</h1>
+                <h1 className="display-2 fw-bold mb-4">About FurnitureZone</h1>
                 <p className="lead mb-5">Creating beautiful spaces since 2008 with premium furniture</p>
                 <Link to="/products" className="btn btn-primary btn-lg px-5 py-3">
                   Discover Our Story <i className="fas fa-arrow-right ms-2"></i>

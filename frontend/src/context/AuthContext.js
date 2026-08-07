@@ -63,6 +63,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const vendorRegister = async (userData) => {
+    try {
+      const response = await authAPI.vendorRegister(userData);
+      const { user, access, refresh } = response.data;
+      
+      sessionStorage.setItem('access_token', access);
+      sessionStorage.setItem('refresh_token', refresh);
+      sessionStorage.setItem('user', JSON.stringify(user));
+      
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data || 'Seller registration failed' 
+      };
+    }
+  };
+
   const logout = () => {
     authAPI.logout();
     setUser(null);
@@ -72,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     register,
+    vendorRegister,
     logout,
     loading,
     isAuthenticated: !!user

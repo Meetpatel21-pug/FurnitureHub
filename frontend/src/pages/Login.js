@@ -101,7 +101,7 @@ const Login = () => {
                     marginBottom: '10px',
                   }}
                 >
-                  FurnitureHub
+                  FurnitureZone
                 </span>
                 <h2
                   style={{

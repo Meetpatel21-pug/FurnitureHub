@@ -103,7 +103,7 @@ function PendingScreen({ status }) {
   return (
     <div style={{ flex: 1, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', minHeight: '100vh', padding: '20px', textAlign: 'center' }}>
       {icons[status] || icons.pending}
-      <span style={S.sectionTag}>FurnitureHub Seller</span>
+      <span style={S.sectionTag}>FurnitureZone Seller</span>
       <h2 style={{ fontFamily: 'var(--font-serif, Georgia, serif)', fontSize: '2rem', fontWeight: 400, color: '#fff', marginBottom: '14px' }}>{info.title}</h2>
       <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.45)', maxWidth: '420px', lineHeight: 1.7, marginBottom: '32px' }}>{info.sub}</p>
       <Link to="/" style={{ ...S.btnPrimary, textDecoration: 'none', padding: '12px 28px' }}>← Back to Home</Link>
@@ -116,10 +116,10 @@ function NotAVendorScreen() {
   return (
     <div style={{ flex: 1, background: '#000', display: 'flex', alignItems: 'center', justifyContent: 'center', flexDirection: 'column', minHeight: '100vh', padding: '20px', textAlign: 'center' }}>
       <i className="fas fa-store" style={{ fontSize: '3.5rem', color: '#fff', marginBottom: '20px' }}></i>
-      <span style={S.sectionTag}>FurnitureHub Marketplace</span>
+      <span style={S.sectionTag}>FurnitureZone Marketplace</span>
       <h2 style={{ fontFamily: 'var(--font-serif, Georgia, serif)', fontSize: '2rem', fontWeight: 400, color: '#fff', marginBottom: '14px' }}>Become a Seller</h2>
       <p style={{ fontSize: '14px', color: 'rgba(255,255,255,0.45)', maxWidth: '420px', lineHeight: 1.7, marginBottom: '32px' }}>
-        You don't have a seller account yet. Register your store to start selling your furniture on FurnitureHub.
+        You don't have a seller account yet. Register your store to start selling your furniture on FurnitureZone.
       </p>
       <Link to="/become-a-seller" style={{ ...S.btnPrimary, textDecoration: 'none', padding: '13px 30px' }}>Start Selling →</Link>
     </div>
@@ -198,6 +198,23 @@ const FormField = ({ label, k, form, setForm, type = 'text', opts, disabled = fa
       ? <select style={{...S.select, opacity: disabled ? 0.5 : 1}} value={form[k] ?? ''} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} disabled={disabled}>
           {(opts || []).map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
         </select>
+      : type === 'multiselect'
+        ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', padding: '8px 0' }}>
+            {(opts || []).map(o => {
+              const isSelected = (form[k] || '').split(',').map(s=>s.trim()).filter(Boolean).includes(o.v);
+              return (
+                <label key={o.v} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.8)', fontSize: '13px', cursor: 'pointer', opacity: disabled ? 0.5 : 1 }}>
+                  <input type="checkbox" checked={isSelected} onChange={(e) => {
+                    let current = (form[k] || '').split(',').map(s=>s.trim()).filter(Boolean);
+                    if (e.target.checked) current.push(o.v);
+                    else current = current.filter(x => x !== o.v);
+                    setForm(f => ({ ...f, [k]: current.join(', ') }));
+                  }} disabled={disabled} style={{ accentColor: 'var(--ink)' }} />
+                  {o.l}
+                </label>
+              );
+            })}
+          </div>
       : type === 'textarea'
         ? <textarea style={{ ...S.input, minHeight: '80px', resize: 'vertical', opacity: disabled ? 0.5 : 1 }} value={form[k] || ''} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} disabled={disabled} />
         : <input style={{...S.input, opacity: disabled ? 0.5 : 1}} type={type} value={form[k] ?? ''} onChange={e => setForm(f => ({ ...f, [k]: type === 'number' ? e.target.value : e.target.value }))} disabled={disabled} />
@@ -214,9 +231,10 @@ function ProductsTab({ products, categories, onRefresh, isApproved }) {
   const [form, setForm]     = useState({});
   const [saving, setSaving] = useState(false);
   const [deleteTarget, setDeleteTarget] = useState(null);
-
-  const filtered = products.filter(p => (p.name || '').toLowerCase().includes(search.toLowerCase()));
-
+  const filtered = products.filter(p => 
+    (p.name || '').toLowerCase().includes(search.toLowerCase()) ||
+    (p.room_category || '').toLowerCase().includes(search.toLowerCase())
+  );
   const openCreate = () => {
     setForm({ name: '', description: '', price: '', stock: 10, available: true, image_url: '', room_category: '', category: categories[0]?.id || '' });
     setModal('create');
@@ -341,10 +359,25 @@ function ProductsTab({ products, categories, onRefresh, isApproved }) {
           <FormField label="Description" k="description" type="textarea" form={form} setForm={setForm} />
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
             <FormField label="Stock" k="stock" type="number" form={form} setForm={setForm} />
-            <FormField label="Category" k="category" type="select" opts={categories.map(c => ({ v: c.id, l: c.name }))} form={form} setForm={setForm} />
+            <FormField 
+              label="Category" 
+              k="room_category" 
+              type="multiselect"
+              opts={[
+                {v: 'table', l: 'Table'},
+                {v: 'chair', l: 'Chair'},
+                {v: 'sofa', l: 'Sofa'},
+                {v: 'bed', l: 'Bed'},
+                {v: 'storage', l: 'Storage'},
+                {v: 'bathroom', l: 'Bathroom'},
+                {v: 'kitchen', l: 'Kitchen'},
+                {v: 'dining-table', l: 'Dining Table'}
+              ]}
+              form={form} 
+              setForm={setForm} 
+            />
           </div>
-          <FormField label="Room Category" k="room_category" form={form} setForm={setForm} />
-          
+
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '0 14px' }}>
             <FormField 
               label="Image URL" 
@@ -571,12 +604,13 @@ function AnalyticsTab({ orders, products }) {
           </thead>
           <tbody>
             {products.length === 0
-              ? <tr><td colSpan={4} style={{ ...S.td, textAlign: 'center', color: 'rgba(255,255,255,0.2)', padding: '28px' }}>No products</td></tr>
+              ? <tr><td colSpan={5} style={{ ...S.td, textAlign: 'center', color: 'rgba(255,255,255,0.2)', padding: '28px' }}>No products</td></tr>
               : products.map(p => (
                   <tr key={p.id}>
                     <td style={{ ...S.td, fontWeight: 500 }}>{p.name}</td>
                     <td style={S.td}>{fmt(parseFloat(p.price))}</td>
                     <td style={S.td}><span style={{ color: (p.stock || 0) <= 5 ? '#f87171' : 'inherit' }}>{p.stock ?? 0}</span></td>
+                    <td style={S.td}>{p.room_category || '—'}</td>
                     <td style={S.td}><span style={S.badge(p.available ? '#4ade80' : '#f87171')}>{p.available ? 'Active' : 'Hidden'}</span></td>
                   </tr>
                 ))
@@ -765,7 +799,7 @@ const SellerDashboard = () => {
       {/* Sidebar */}
       <aside style={S.sidebar}>
         <div style={S.sidebarBrand}>
-          <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: '5px' }}>FurnitureHub</div>
+          <div style={{ fontSize: '9px', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.28)', marginBottom: '5px' }}>FurnitureZone</div>
           <div style={{ fontFamily: 'var(--font-serif, Georgia, serif)', fontSize: '1rem', color: '#fff' }}>Seller Dashboard</div>
         </div>
 

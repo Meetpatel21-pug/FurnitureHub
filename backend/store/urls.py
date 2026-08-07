@@ -6,6 +6,7 @@ urlpatterns = [
     path('ai/chat/', views.chat_with_furnibot, name='ai-chat'),
     # Authentication
     path('auth/register/', views.register, name='register'),
+    path('auth/vendor-register/', views.vendor_auth_register, name='vendor-auth-register'),
     path('auth/login/', views.login, name='login'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/forgot-password/', views.forgot_password, name='forgot-password'),

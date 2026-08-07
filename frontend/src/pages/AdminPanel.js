@@ -349,7 +349,7 @@ function OverviewTab({ products, orders, users }) {
   return (
     <div>
       <div style={S.sectionHead}>
-        <span style={S.sectionTag}>FurnitureHub Admin</span>
+        <span style={S.sectionTag}>FurnitureZone Admin</span>
         <h2 style={S.sectionTitle}>Overview</h2>
       </div>
 
@@ -525,7 +525,7 @@ function AnalyticsTab({ orders, products }) {
   return (
     <div>
       <div style={S.sectionHead}>
-        <span style={S.sectionTag}>FurnitureHub Admin</span>
+        <span style={S.sectionTag}>FurnitureZone Admin</span>
         <h2 style={S.sectionTitle}>Analytics</h2>
       </div>
 
@@ -583,6 +583,23 @@ const AdminFormField = ({ label, k, form, setForm, type = 'text', opts, disabled
       ? <select style={{...S.select, opacity: disabled ? 0.5 : 1}} value={form[k] ?? ''} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} disabled={disabled}>
           {(opts || []).map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
         </select>
+      : type === 'multiselect'
+        ? <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', padding: '8px 0' }}>
+            {(opts || []).map(o => {
+              const isSelected = (form[k] || '').split(',').map(s=>s.trim()).filter(Boolean).includes(o.v);
+              return (
+                <label key={o.v} style={{ display: 'flex', alignItems: 'center', gap: '6px', color: 'rgba(255,255,255,0.8)', fontSize: '13px', cursor: 'pointer', opacity: disabled ? 0.5 : 1 }}>
+                  <input type="checkbox" checked={isSelected} onChange={(e) => {
+                    let current = (form[k] || '').split(',').map(s=>s.trim()).filter(Boolean);
+                    if (e.target.checked) current.push(o.v);
+                    else current = current.filter(x => x !== o.v);
+                    setForm(f => ({ ...f, [k]: current.join(', ') }));
+                  }} disabled={disabled} style={{ accentColor: 'var(--ink)' }} />
+                  {o.l}
+                </label>
+              );
+            })}
+          </div>
       : type === 'textarea'
         ? <textarea style={{ ...S.input, minHeight: '80px', resize: 'vertical', opacity: disabled ? 0.5 : 1 }} value={form[k] || ''} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} disabled={disabled} />
         : <input style={{...S.input, opacity: disabled ? 0.5 : 1}} type={type} value={form[k] ?? ''} onChange={e => setForm(f => ({ ...f, [k]: type === 'number' ? e.target.value : e.target.value }))} disabled={disabled} />
@@ -602,7 +619,7 @@ function ProductsTab({ products, categories, onRefresh }) {
 
   const filtered = products.filter(p =>
     (p.name || '').toLowerCase().includes(search.toLowerCase()) ||
-    (p.category_name || (typeof p.category === 'object' ? p.category?.name : p.category) || '').toLowerCase().includes(search.toLowerCase())
+    (p.room_category || '').toLowerCase().includes(search.toLowerCase())
   );
 
   const defaultForm = { name:'', slug:'', description:'', price:'', stock:10, available:true, image_url:'', room_category:'', category: categories[0]?.id || '' };
@@ -674,7 +691,7 @@ function ProductsTab({ products, categories, onRefresh }) {
     <div>
       <div style={{ ...S.sectionHead, display:'flex', justifyContent:'space-between', alignItems:'flex-end' }}>
         <div>
-          <span style={S.sectionTag}>FurnitureHub Admin</span>
+          <span style={S.sectionTag}>FurnitureZone Admin</span>
           <h2 style={S.sectionTitle}>Products</h2>
         </div>
         <button style={S.btnPrimary} onClick={openCreate}>+ Add Product</button>
@@ -701,7 +718,7 @@ function ProductsTab({ products, categories, onRefresh }) {
                         }
                       </td>
                       <td style={{ ...S.td, fontWeight:500, maxWidth:'180px' }}>{p.name}</td>
-                      <td style={S.td}>{p.category_name || (typeof p.category === 'object' ? p.category?.name : p.category) || '—'}</td>
+                      <td style={S.td}>{p.room_category || '—'}</td>
                       <td style={S.td}>{fmt(parseFloat(p.price))}</td>
                       <td style={S.td}><span style={{ color:(p.stock||0)<=5?'#f87171':'inherit', fontWeight:(p.stock||0)<=5?700:400 }}>{p.stock??0}</span></td>
                       <td style={S.td}><span style={S.badge(p.model_file ? '#a78bfa':'rgba(255,255,255,0.2)')}>{p.model_file ? '📦 3D .glb' : 'None'}</span></td>
@@ -731,8 +748,23 @@ function ProductsTab({ products, categories, onRefresh }) {
             <AdminFormField label="Price (₹) *" k="price" type="number" form={form} setForm={setForm} />
             <AdminFormField label="Stock" k="stock" type="number" form={form} setForm={setForm} />
           </div>
-          {categories.length > 0 && <AdminFormField label="Category" k="category" type="select" opts={categories.map(c => ({ v: c.id, l: c.name }))} form={form} setForm={setForm} />}
-          <AdminFormField label="Room Category" k="room_category" form={form} setForm={setForm} />
+          <AdminFormField 
+            label="Category" 
+            k="room_category" 
+            type="multiselect"
+            opts={[
+              {v: 'table', l: 'Table'},
+              {v: 'chair', l: 'Chair'},
+              {v: 'sofa', l: 'Sofa'},
+              {v: 'bed', l: 'Bed'},
+              {v: 'storage', l: 'Storage'},
+              {v: 'bathroom', l: 'Bathroom'},
+              {v: 'kitchen', l: 'Kitchen'},
+              {v: 'dining-table', l: 'Dining Table'}
+            ]}
+            form={form} 
+            setForm={setForm} 
+          />
           
           <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
             <AdminFormField 
@@ -855,7 +887,7 @@ function OrdersTab({ orders, onRefresh }) {
   return (
     <div>
       <div style={S.sectionHead}>
-        <span style={S.sectionTag}>FurnitureHub Admin</span>
+        <span style={S.sectionTag}>FurnitureZone Admin</span>
         <h2 style={S.sectionTitle}>Orders</h2>
       </div>
 
@@ -939,7 +971,7 @@ function UsersTab({ users, onRefresh }) {
   return (
     <div>
       <div style={S.sectionHead}>
-        <span style={S.sectionTag}>FurnitureHub Admin</span>
+        <span style={S.sectionTag}>FurnitureZone Admin</span>
         <h2 style={S.sectionTitle}>Users</h2>
       </div>
 
@@ -1015,7 +1047,7 @@ function WishlistsTab({ wishlists, onRefresh }) {
   return (
     <div>
       <div style={S.sectionHead}>
-        <span style={S.sectionTag}>FurnitureHub Admin</span>
+        <span style={S.sectionTag}>FurnitureZone Admin</span>
         <h2 style={S.sectionTitle}>Wishlists</h2>
       </div>
 
@@ -1101,7 +1133,7 @@ function AdminLoginScreen({ onSuccess }) {
         {/* Brand */}
         <div style={{ textAlign: 'center', marginBottom: '40px' }}>
           <div style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.25em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', marginBottom: '10px' }}>
-            FurnitureHub
+            FurnitureZone
           </div>
           <h1 style={{ fontFamily: 'var(--font-serif, Georgia, serif)', fontSize: '2.2rem', fontWeight: 400, color: '#ffffff', margin: 0, lineHeight: 1.1 }}>
             Admin Panel
@@ -1186,7 +1218,7 @@ function AdminLoginScreen({ onSuccess }) {
               href="/"
               style={{ fontSize: '12px', color: 'rgba(255,255,255,0.35)', textDecoration: 'none', letterSpacing: '0.06em' }}
             >
-              ← Back to FurnitureHub
+              ← Back to FurnitureZone
             </a>
           </div>
         </div>
@@ -1227,7 +1259,7 @@ function VendorsTab({ vendors, onRefresh }) {
   return (
     <div>
       <div style={S.sectionHead}>
-        <span style={S.sectionTag}>FurnitureHub Admin</span>
+        <span style={S.sectionTag}>FurnitureZone Admin</span>
         <h2 style={S.sectionTitle}>Vendors</h2>
       </div>
 
@@ -1366,7 +1398,7 @@ const AdminPanel = () => {
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
   // ── Admin Login Screen ────────────────────────────────────────────────────
-  if (!user) {
+  if (!user || (!user.is_staff && !user.is_superuser)) {
     return <AdminLoginScreen onSuccess={fetchAll} />;
   }
 
@@ -1384,7 +1416,7 @@ const AdminPanel = () => {
       {/* ── Sidebar ── */}
       <aside style={S.sidebar}>
         <div style={S.sidebarBrand}>
-          <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', marginBottom:'6px' }}>FurnitureHub</div>
+          <div style={{ fontSize:'9px', fontWeight:700, letterSpacing:'0.22em', textTransform:'uppercase', color:'rgba(255,255,255,0.3)', marginBottom:'6px' }}>FurnitureZone</div>
           <div style={{ fontFamily:'var(--font-serif, Georgia, serif)', fontSize:'1.1rem', color:'#ffffff', fontWeight:400 }}>Admin Panel</div>
         </div>
 

@@ -117,7 +117,7 @@ def _detect_objects(room_type, width, height, image_path=None):
                 return detections[:8]
         except Exception:
             pass
-
+            
     box_specs = [
         (profile['labels'][0], 0.12, 0.56, 0.42, 0.28, 0.96),
         (profile['labels'][1], 0.58, 0.34, 0.24, 0.22, 0.89),
@@ -318,11 +318,84 @@ def analyze_room_image(uploaded_image, user=None, budget=None, style=None, room_
         brightness = ImageStat.Stat(ImageOps.grayscale(image)).mean[0]
         dominant_rgb = image.resize((1, 1)).getpixel((0, 0))
 
-    room_type = _predict_room_type_with_cnn(image)
+    room_type = ''
+    room_style = ''
+    detections = []
+    
+    try:
+        import os
+        import json
+        import urllib.request
+        import urllib.error
+        import base64
+        from io import BytesIO
+        
+        gemini_api_key = os.environ.get('GEMINI_API_KEY', '')
+        if gemini_api_key:
+            with Image.open(scan.uploaded_image.path) as original_image:
+                original_image = original_image.convert('RGB')
+                original_image.thumbnail((1024, 1024))
+                buffered = BytesIO()
+                original_image.save(buffered, format="JPEG")
+                img_str = base64.b64encode(buffered.getvalue()).decode("utf-8")
+                
+            prompt = f"Analyze this room image. Return a JSON object with strictly these keys: 'room_type' (e.g. living_room, bedroom, kitchen, dining_room, office), 'room_style' (e.g. modern, contemporary, minimal, cozy), 'detections' (list of objects detected, each with 'label' (string), 'confidence' (float 0-1), 'bbox_x', 'bbox_y', 'bbox_w', 'bbox_h' using absolute pixel coordinates for an image of size {original_image.width}x{original_image.height})."
+            if room_hint: prompt += f" Hint: The user considers this a {room_hint}."
+            if style: prompt += f" Hint: The user prefers {style} style."
+            
+            url = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key={gemini_api_key}"
+            payload = {
+                "contents": [{
+                    "parts": [
+                        {"text": prompt},
+                        {
+                            "inline_data": {
+                                "mime_type": "image/jpeg",
+                                "data": img_str
+                            }
+                        }
+                    ]
+                }]
+            }
+            req = urllib.request.Request(url, data=json.dumps(payload).encode('utf-8'), headers={'Content-Type': 'application/json'})
+            
+            try:
+                response = urllib.request.urlopen(req)
+                response_data = json.loads(response.read().decode('utf-8'))
+                response_text = response_data['candidates'][0]['content']['parts'][0]['text'].strip()
+                
+                import re
+                match = re.search(r'\{.*\}', response_text, re.DOTALL)
+                if match:
+                    data = json.loads(match.group(0))
+                    room_type = data.get('room_type', '').lower().replace(' ', '_')
+                    room_style = data.get('room_style', '').lower()
+                    
+                    scale_x = width / original_image.width
+                    scale_y = height / original_image.height
+                    
+                    for d in data.get('detections', []):
+                        detections.append({
+                            'label': d.get('label', 'object'),
+                            'confidence': float(d.get('confidence', 0.8)),
+                            'bbox_x': int(d.get('bbox_x', 0) * scale_x),
+                            'bbox_y': int(d.get('bbox_y', 0) * scale_y),
+                            'bbox_w': int(d.get('bbox_w', 0) * scale_x),
+                            'bbox_h': int(d.get('bbox_h', 0) * scale_y),
+                            'source': 'gemini',
+                        })
+            except urllib.error.HTTPError as e:
+                raise Exception(f"HTTPError: {e.code} {e.read().decode('utf-8')}")
+    except Exception as e:
+        print("Gemini API Error:", e)
+
     if not room_type:
         room_type = _infer_room_type(room_hint, width, height, brightness, dominant_rgb)
-    room_style = _infer_room_style(style, brightness, dominant_rgb)
-    detections = _detect_objects(room_type, width, height, scan.uploaded_image.path)
+    if not room_style:
+        room_style = _infer_room_style(style, brightness, dominant_rgb)
+    if not detections:
+        detections = _detect_objects(room_type, width, height, scan.uploaded_image.path)
+    
     knn_scores = _collect_knn_scores()
 
     products = Product.objects.filter(available=True).select_related('category')
@@ -333,8 +406,9 @@ def analyze_room_image(uploaded_image, user=None, budget=None, style=None, room_
             budget_val = float(budget)
             if budget_val > 0:
                 within_budget = [p for p in products if float(p.price) <= budget_val]
-                if within_budget:
-                    products = within_budget
+                if not within_budget:
+                    return {'error': f'No products found within your budget of ₹{budget_val}. Try increasing your budget.'}
+                products = within_budget
         except (ValueError, TypeError):
             pass
 
@@ -392,7 +466,7 @@ def analyze_room_image(uploaded_image, user=None, budget=None, style=None, room_
                 'price': float(product.price),
                 'score': round(score, 4),
                 'reason': reason,
-                'image_url': product.image_url,
+                'image_url': product.image.url if product.image else product.image_url,
                 'category': product.category.name if product.category else 'Furniture',
                 'stock': product.stock,
                 'available': product.available,

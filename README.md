@@ -1,4 +1,4 @@
-# FurnitureHub — Multi-Vendor Marketplace & AI Room Designer
+# FurnitureZone — Multi-Vendor Marketplace & AI Room Designer
 
 A luxury online furniture marketplace and interior design platform built with **React** frontend and **Django REST Framework** backend.
 

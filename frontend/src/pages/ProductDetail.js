@@ -454,7 +454,7 @@ const ProductDetail = () => {
             <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '22px 18px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
               <i className="fas fa-magic" style={{ fontSize: '1.4rem', color: '#ffffff', marginBottom: '10px' }}></i>
               <div style={{ color: '#ffffff', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>Room AI Compatible</div>
-              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', lineHeight: 1.5 }}>Auto-matches with room scans using our FurnitureHub AI designer.</div>
+              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', lineHeight: 1.5 }}>Auto-matches with room scans using our FurnitureZone AI designer.</div>
             </div>
           </div>
         </div>

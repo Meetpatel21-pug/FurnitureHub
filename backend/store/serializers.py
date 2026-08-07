@@ -3,9 +3,14 @@ from django.contrib.auth.models import User
 from .models import Category, Product, Cart, CartItem, Wishlist, Order, OrderItem, Review, UserProfile, RoomScan, DetectedObject, RoomRecommendation, Vendor
 
 class UserSerializer(serializers.ModelSerializer):
+    is_vendor = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'is_vendor']
+
+    def get_is_vendor(self, obj):
+        return hasattr(obj, 'vendor_profile')
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)

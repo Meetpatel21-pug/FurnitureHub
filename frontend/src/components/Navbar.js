@@ -68,10 +68,10 @@ const Navbar = () => {
               onClick={() => navigate('/')}
               role="link"
               tabIndex={0}
-              aria-label="FurnitureHub home"
+              aria-label="FurnitureZone home"
               onKeyDown={(e) => e.key === 'Enter' && navigate('/')}
             >
-              <span className="logo-text">FurnitureHub</span>
+              <span className="logo-text">FurnitureZone</span>
             </div>
 
             {/* Main Links on Header (Visible on Desktop / Tablet) */}
