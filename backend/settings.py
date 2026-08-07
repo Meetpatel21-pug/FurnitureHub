@@ -105,6 +105,10 @@ ROOM_AI_CNN_CLASSES = [
 XAI_API_KEY = config('XAI_API_KEY', default='')
 XAI_MODEL = config('XAI_MODEL', default='grok-4.5')
 
+# Gemini credentials for the chatbot
+GEMINI_API_KEY = config('GEMINI_API_KEY', default='')
+GEMINI_MODEL = config('GEMINI_MODEL', default='gemini-1.5-flash')
+
 EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))

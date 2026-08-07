@@ -10,8 +10,8 @@ class ChatBotFallbackTests(SimpleTestCase):
     def setUp(self):
         self.factory = APIRequestFactory()
 
-    @override_settings(XAI_API_KEY='')
-    def test_chat_returns_local_fallback_when_xai_is_unconfigured(self):
+    @override_settings(GEMINI_API_KEY='')
+    def test_chat_returns_local_fallback_when_gemini_is_unconfigured(self):
         request = self.factory.post(
             '/api/ai/chat/',
             {'message': 'Best sofas for small rooms?'},
@@ -25,8 +25,8 @@ class ChatBotFallbackTests(SimpleTestCase):
         self.assertIn('sofa', response.data['reply'].lower())
 
     @patch('store.views.urlopen', side_effect=Exception('service unavailable'))
-    @override_settings(XAI_API_KEY='test-key')
-    def test_chat_returns_local_fallback_when_xai_service_fails(self, _mock_urlopen):
+    @override_settings(GEMINI_API_KEY='test-key')
+    def test_chat_returns_local_fallback_when_gemini_service_fails(self, _mock_urlopen):
         request = self.factory.post(
             '/api/ai/chat/',
             {'message': 'What is your delivery policy?'},
@@ -39,7 +39,7 @@ class ChatBotFallbackTests(SimpleTestCase):
         self.assertIn('delivery', response.data['reply'].lower())
 
     @patch('store.views.urlopen')
-    @override_settings(XAI_API_KEY='test-key')
+    @override_settings(GEMINI_API_KEY='test-key')
     def test_chat_rejects_non_furniture_messages_before_calling_ai(self, mock_urlopen):
         request = self.factory.post(
             '/api/ai/chat/',
@@ -53,7 +53,7 @@ class ChatBotFallbackTests(SimpleTestCase):
         self.assertEqual(response.data['reply'], OUT_OF_SCOPE_CHAT_REPLY)
         mock_urlopen.assert_not_called()
 
-    @override_settings(XAI_API_KEY='')
+    @override_settings(GEMINI_API_KEY='')
     def test_chat_gives_specific_fallback_for_sofa_material_comparison(self):
         request = self.factory.post(
             '/api/ai/chat/',

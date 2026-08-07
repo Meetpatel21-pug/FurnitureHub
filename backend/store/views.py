@@ -141,7 +141,7 @@ def _build_fallback_reply(message):
 @api_view(['POST'])
 @permission_classes([AllowAny])
 def chat_with_furnibot(request):
-    """Proxy chat requests to xAI when available, otherwise return a helpful local fallback."""
+    """Proxy chat requests to Gemini when available, otherwise return a helpful local fallback."""
     message = str(request.data.get('message', '')).strip()
     if not message:
         return Response({'error': 'A message is required.'}, status=status.HTTP_400_BAD_REQUEST)
@@ -150,7 +150,7 @@ def chat_with_furnibot(request):
     if not _is_furniture_chat_message(message):
         return Response({'reply': OUT_OF_SCOPE_CHAT_REPLY})
 
-    if not settings.XAI_API_KEY:
+    if not settings.GEMINI_API_KEY:
         return Response({'reply': _build_fallback_reply(message)})
 
     raw_history = request.data.get('history', [])
@@ -163,21 +163,35 @@ def chat_with_furnibot(request):
             if content:
                 history.append({'role': item['role'], 'content': content[:1000]})
 
+    # Format history and current message for Gemini contents parameter
+    contents = []
+    for item in history:
+        role = 'user' if item['role'] == 'user' else 'model'
+        contents.append({
+            'role': role,
+            'parts': [{'text': item['content']}]
+        })
+    contents.append({
+        'role': 'user',
+        'parts': [{'text': message}]
+    })
+
     payload = {
-        'model': settings.XAI_MODEL,
-        'messages': [
-            {'role': 'system', 'content': CHAT_SYSTEM_PROMPT},
-            *history,
-            {'role': 'user', 'content': message},
-        ],
-        'temperature': 0.7,
-        'max_tokens': 350,
+        'contents': contents,
+        'systemInstruction': {
+            'parts': [
+                {'text': CHAT_SYSTEM_PROMPT}
+            ]
+        },
+        'generationConfig': {
+            'temperature': 0.7,
+            'maxOutputTokens': 350,
+        }
     }
     api_request = Request(
-        'https://api.x.ai/v1/chat/completions',
+        f'https://generativelanguage.googleapis.com/v1beta/models/{settings.GEMINI_MODEL}:generateContent?key={settings.GEMINI_API_KEY}',
         data=json.dumps(payload).encode('utf-8'),
         headers={
-            'Authorization': f'Bearer {settings.XAI_API_KEY}',
             'Content-Type': 'application/json',
         },
         method='POST',
@@ -193,21 +207,25 @@ def chat_with_furnibot(request):
         )
         with urlopen(api_request, timeout=30, context=ssl_context) as api_response:
             data = json.loads(api_response.read().decode('utf-8'))
-        choices = data.get('choices') if isinstance(data, dict) else None
-        if not isinstance(choices, list) or not choices or not isinstance(choices[0], dict):
+        candidates = data.get('candidates') if isinstance(data, dict) else None
+        if not isinstance(candidates, list) or not candidates or not isinstance(candidates[0], dict):
             raise ValueError('The chat provider returned no completion choices.')
-        reply = str(choices[0].get('message', {}).get('content', '')).strip()
+        content = candidates[0].get('content', {})
+        parts = content.get('parts', [])
+        if not isinstance(parts, list) or not parts:
+            raise ValueError('The chat provider returned no parts.')
+        reply = str(parts[0].get('text', '')).strip()
         if not reply:
             raise ValueError('The chat provider returned an empty response.')
         return Response({'reply': reply})
     except HTTPError as exc:
-        logger.warning('xAI chat request failed with HTTP %s', exc.code)
+        logger.warning('Gemini chat request failed with HTTP %s', exc.code)
         return Response({'reply': _build_fallback_reply(message)})
     except (URLError, TimeoutError, ValueError, json.JSONDecodeError):
-        logger.warning('xAI chat request failed; using local fallback reply', exc_info=True)
+        logger.warning('Gemini chat request failed; using local fallback reply', exc_info=True)
         return Response({'reply': _build_fallback_reply(message)})
     except Exception:
-        logger.exception('Unexpected xAI chat service failure')
+        logger.exception('Unexpected Gemini chat service failure')
         return Response({'reply': _build_fallback_reply(message)})
 
 

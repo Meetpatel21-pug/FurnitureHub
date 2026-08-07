@@ -109,7 +109,7 @@ const ChatBot = ({ showAfterScroll = false }) => {
         return;
       }
 
-      /* Legacy client-side Gemini request removed: xAI is called by Django. */
+      /* Legacy client-side Gemini request removed: Gemini is called by Django. */
       /*
       const unusedReply =
         ({}).candidates?.[0]?.content?.parts?.[0]?.text ||
@@ -230,7 +230,7 @@ const ChatBot = ({ showAfterScroll = false }) => {
             }
           </button>
         </div>
-        <div className="chatbot-powered">Powered by xAI</div>
+        <div className="chatbot-powered">Powered by Gemini</div>
       </div>
 
       {/* ── FAB Toggle ── */}
