@@ -14,6 +14,8 @@ const ProductDetail = () => {
   const [product, setProduct] = useState(null);
   const [reviews, setReviews] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [show3D, setShow3D] = useState(false);
+  const [isFullScreen, setIsFullScreen] = useState(false);
   const [reviewForm, setReviewForm] = useState({ rating: 5, comment: '' });
   const { isAuthenticated } = useAuth();
   const { addToCart } = useCart();
@@ -163,24 +165,137 @@ const ProductDetail = () => {
           <div className="row g-5 align-items-stretch">
             {/* Left: 3D Viewer & Media */}
             <div className="col-lg-6">
-              <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '24px', height: '100%', minHeight: '440px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
-                <Suspense
-                  fallback={
-                    <div style={{ minHeight: '380px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
-                      <div className="spinner-border text-light mb-3" role="status" style={{ width: '2.5rem', height: '2.5rem' }} />
-                      <h5 style={{ color: '#fff', fontWeight: 400 }}>Loading 3D Furniture Viewer</h5>
-                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>Preparing 3D model geometry...</p>
+              <div 
+                style={{ 
+                  background: '#0a0a0a', 
+                  border: '1px solid rgba(255,255,255,0.08)', 
+                  borderRadius: '20px', 
+                  padding: '24px', 
+                  height: '100%', 
+                  minHeight: '440px', 
+                  display: 'flex', 
+                  flexDirection: 'column', 
+                  justifyContent: 'center',
+                  position: isFullScreen ? 'fixed' : 'relative',
+                  top: isFullScreen ? 0 : 'auto',
+                  left: isFullScreen ? 0 : 'auto',
+                  width: isFullScreen ? '100vw' : 'auto',
+                  height: isFullScreen ? '100vh' : '100%',
+                  zIndex: isFullScreen ? 9999 : 1,
+                  margin: 0
+                }}
+              >
+                {!show3D ? (
+                  <div style={{ position: 'relative', width: '100%', height: '100%', minHeight: '380px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                    <img 
+                      src={previewImageUrl || '/placeholder.png'} 
+                      alt={product.name} 
+                      style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: '12px' }}
+                    />
+                    {modelUrl && (
+                      <button 
+                        onClick={() => setShow3D(true)}
+                        style={{ 
+                          position: 'absolute', 
+                          bottom: '20px', 
+                          right: '20px', 
+                          background: 'rgba(0,0,0,0.65)', 
+                          backdropFilter: 'blur(12px)', 
+                          WebkitBackdropFilter: 'blur(12px)',
+                          border: '1px solid rgba(255,255,255,0.15)', 
+                          color: '#ffffff', 
+                          padding: '10px 20px', 
+                          borderRadius: '30px', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          gap: '8px',
+                          cursor: 'pointer',
+                          fontWeight: 600,
+                          boxShadow: '0 4px 15px rgba(0,0,0,0.2)',
+                          transition: 'all 0.3s cubic-bezier(0.25, 1, 0.5, 1)'
+                        }}
+                        onMouseEnter={(e) => { 
+                          e.currentTarget.style.background = 'rgba(0,0,0,0.85)'; 
+                          e.currentTarget.style.transform = 'scale(1.05) translateY(-2px)'; 
+                          e.currentTarget.style.boxShadow = '0 6px 20px rgba(0,0,0,0.3)';
+                        }}
+                        onMouseLeave={(e) => { 
+                          e.currentTarget.style.background = 'rgba(0,0,0,0.65)'; 
+                          e.currentTarget.style.transform = 'scale(1) translateY(0)'; 
+                          e.currentTarget.style.boxShadow = '0 4px 15px rgba(0,0,0,0.2)';
+                        }}
+                      >
+                        <i className="fas fa-cube"></i> View in 3D
+                      </button>
+                    )}
+                  </div>
+                ) : (
+                  <div style={{ position: 'relative', width: '100%', height: '100%' }}>
+                    <Suspense
+                      fallback={
+                        <div style={{ minHeight: '380px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                          <div className="spinner-border text-light mb-3" role="status" style={{ width: '2.5rem', height: '2.5rem' }} />
+                          <h5 style={{ color: '#fff', fontWeight: 400 }}>Loading 3D Furniture Viewer</h5>
+                          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>Preparing 3D model geometry...</p>
+                        </div>
+                      }
+                    >
+                      <FurnitureViewer
+                        name={product.name}
+                        category={product.category?.name}
+                        modelUrl={modelUrl}
+                        posterUrl={previewImageUrl}
+                        fallbackImage={previewImageUrl}
+                      />
+                    </Suspense>
+                    <div style={{ position: 'absolute', top: '10px', right: '10px', display: 'flex', gap: '10px', zIndex: 10 }}>
+                      <button 
+                        onClick={() => setIsFullScreen(!isFullScreen)}
+                        style={{ 
+                          background: 'rgba(0,0,0,0.5)', 
+                          backdropFilter: 'blur(10px)', 
+                          border: '1px solid rgba(255,255,255,0.2)', 
+                          color: '#fff', 
+                          width: '40px', 
+                          height: '40px', 
+                          borderRadius: '50%', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease'
+                        }}
+                        title={isFullScreen ? "Exit Full Screen" : "Full Screen"}
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.5)'; }}
+                      >
+                        <i className={`fas ${isFullScreen ? 'fa-compress' : 'fa-expand'}`}></i>
+                      </button>
+                      <button 
+                        onClick={() => { setShow3D(false); setIsFullScreen(false); }}
+                        style={{ 
+                          background: 'rgba(0,0,0,0.5)', 
+                          backdropFilter: 'blur(10px)', 
+                          border: '1px solid rgba(255,255,255,0.2)', 
+                          color: '#fff', 
+                          width: '40px', 
+                          height: '40px', 
+                          borderRadius: '50%', 
+                          display: 'flex', 
+                          alignItems: 'center', 
+                          justifyContent: 'center',
+                          cursor: 'pointer',
+                          transition: 'all 0.3s ease'
+                        }}
+                        title="Close 3D View"
+                        onMouseEnter={(e) => { e.currentTarget.style.background = 'rgba(255,255,255,0.2)'; e.currentTarget.style.color = '#ff6b6b'; }}
+                        onMouseLeave={(e) => { e.currentTarget.style.background = 'rgba(0,0,0,0.5)'; e.currentTarget.style.color = '#fff'; }}
+                      >
+                        <i className="fas fa-times"></i>
+                      </button>
                     </div>
-                  }
-                >
-                  <FurnitureViewer
-                    name={product.name}
-                    category={product.category?.name}
-                    modelUrl={modelUrl}
-                    posterUrl={previewImageUrl}
-                    fallbackImage={previewImageUrl}
-                  />
-                </Suspense>
+                  </div>
+                )}
               </div>
             </div>
 

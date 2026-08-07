@@ -59,23 +59,26 @@ const RoomAnalyzer = () => {
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
   const [dbRecommendations, setDbRecommendations] = useState([]);
+  const [dbFallback, setDbFallback] = useState([]);
 
   useEffect(() => {
     const fetchDbProducts = async () => {
       try {
-        const res = await mlAPI.getRecommendations('knn', 6);
+        const [res, fallbackRes] = await Promise.all([
+          mlAPI.getRecommendations('knn', 10).catch(() => ({ data: { recommendations: [] } })),
+          productsAPI.getAll({ limit: 10 })
+        ]);
         const items = res.data?.recommendations || [];
-        if (Array.isArray(items) && items.length > 0) {
+        if (Array.isArray(items)) {
           setDbRecommendations(items);
-        } else {
-          const prodRes = await productsAPI.getAll();
-          const prods = prodRes.data?.results || prodRes.data || [];
-          if (Array.isArray(prods) && prods.length > 0) {
-            setDbRecommendations(prods);
-          }
+        }
+        
+        const fallbackItems = fallbackRes.data?.results || fallbackRes.data || [];
+        if (Array.isArray(fallbackItems)) {
+          setDbFallback(fallbackItems);
         }
       } catch (err) {
-        console.error('Failed to fetch database products for suggestions:', err);
+        console.error('Error fetching ML recommendations', err);
       }
     };
     fetchDbProducts();
@@ -125,22 +128,27 @@ const RoomAnalyzer = () => {
   };
 
   const detections = analysis?.detected_objects || [];
+  const availableFilter = (p) => p && p.available !== false && (p.stock === undefined || p.stock > 0);
+
   const baseRecommendations = analysis?.recommendations?.length
     ? analysis.recommendations
     : dbRecommendations.length
     ? dbRecommendations
-    : fallbackRecommendations;
+    : dbFallback;
 
   const recommendations = useMemo(() => {
-    if (!budget || isNaN(Number(budget)) || Number(budget) <= 0) {
-      return baseRecommendations;
+    const availableRecs = baseRecommendations.filter(availableFilter);
+    if (!budget) {
+      return availableRecs;
     }
     const budgetVal = Number(budget);
-    const withinBudget = baseRecommendations.filter((item) => Number(item.price || 0) <= budgetVal);
+    const withinBudget = availableRecs.filter((item) => Number(item.price || 0) <= budgetVal);
+    
     if (withinBudget.length > 0) {
-      return withinBudget.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+      return withinBudget;
     }
-    return [...baseRecommendations].sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+    
+    return [...availableRecs].sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
   }, [baseRecommendations, budget]);
 
   return (

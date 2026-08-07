@@ -576,16 +576,16 @@ function AnalyticsTab({ orders, products }) {
 }
 
 // ─── Admin Form Field Helper (Defined outside component to prevent focus loss on typing) ───
-const AdminFormField = ({ label, k, form, setForm, type = 'text', opts }) => (
+const AdminFormField = ({ label, k, form, setForm, type = 'text', opts, disabled = false }) => (
   <div style={{ marginBottom: '16px' }}>
-    <label style={S.label}>{label}</label>
+    <label style={{...S.label, opacity: disabled ? 0.5 : 1}}>{label}</label>
     {type === 'select'
-      ? <select style={S.select} value={form[k] ?? ''} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))}>
+      ? <select style={{...S.select, opacity: disabled ? 0.5 : 1}} value={form[k] ?? ''} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} disabled={disabled}>
           {(opts || []).map(o => <option key={o.v} value={o.v}>{o.l}</option>)}
         </select>
       : type === 'textarea'
-        ? <textarea style={{ ...S.input, minHeight: '80px', resize: 'vertical' }} value={form[k] || ''} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} />
-        : <input style={S.input} type={type} value={form[k] ?? ''} onChange={e => setForm(f => ({ ...f, [k]: type === 'number' ? e.target.value : e.target.value }))} />
+        ? <textarea style={{ ...S.input, minHeight: '80px', resize: 'vertical', opacity: disabled ? 0.5 : 1 }} value={form[k] || ''} onChange={e => setForm(f => ({ ...f, [k]: e.target.value }))} disabled={disabled} />
+        : <input style={{...S.input, opacity: disabled ? 0.5 : 1}} type={type} value={form[k] ?? ''} onChange={e => setForm(f => ({ ...f, [k]: type === 'number' ? e.target.value : e.target.value }))} disabled={disabled} />
     }
   </div>
 );
@@ -615,14 +615,19 @@ function ProductsTab({ products, categories, onRefresh }) {
     setSaving(true);
     try {
       let payload;
-      if (form.model_file instanceof File) {
+      if (form.model_file instanceof File || form.image_file instanceof File) {
         payload = new FormData();
         Object.keys(form).forEach(k => {
-          if (form[k] !== null && form[k] !== undefined && k !== 'model_file') {
+          if (form[k] !== null && form[k] !== undefined && k !== 'model_file' && k !== 'image_file') {
             payload.append(k, typeof form[k] === 'object' ? (form[k].id || JSON.stringify(form[k])) : form[k]);
           }
         });
-        payload.append('model_file', form.model_file);
+        if (form.model_file instanceof File) {
+          payload.append('model_file', form.model_file);
+        }
+        if (form.image_file instanceof File) {
+          payload.append('image', form.image_file);
+        }
         if (!form.slug) {
           payload.append('slug', form.name.toLowerCase().replace(/\s+/g,'-').replace(/[^a-z0-9-]/g,''));
         }
@@ -630,6 +635,9 @@ function ProductsTab({ products, categories, onRefresh }) {
         payload = { ...form };
         if (typeof payload.model_file === 'string') {
           delete payload.model_file;
+        }
+        if (typeof payload.image_file === 'string') {
+          delete payload.image_file;
         }
         if (typeof payload.category === 'object') {
           payload.category = payload.category.id;
@@ -725,7 +733,43 @@ function ProductsTab({ products, categories, onRefresh }) {
           </div>
           {categories.length > 0 && <AdminFormField label="Category" k="category" type="select" opts={categories.map(c => ({ v: c.id, l: c.name }))} form={form} setForm={setForm} />}
           <AdminFormField label="Room Category" k="room_category" form={form} setForm={setForm} />
-          <AdminFormField label="Image URL" k="image_url" form={form} setForm={setForm} />
+          
+          <div style={{ display:'grid', gridTemplateColumns:'1fr 1fr', gap:'0 16px' }}>
+            <AdminFormField 
+              label="Image URL" 
+              k="image_url" 
+              form={form} 
+              setForm={setForm} 
+              disabled={!!form.image_file} 
+            />
+            <div style={{ marginBottom: '16px' }}>
+              <label style={{...S.label, opacity: form.image_url ? 0.5 : 1}}>Or Upload Image File</label>
+              <input
+                type="file"
+                accept="image/*"
+                style={{ ...S.input, padding: '8px 12px', opacity: form.image_url ? 0.5 : 1 }}
+                disabled={!!form.image_url}
+                onChange={e => {
+                  const file = e.target.files[0];
+                  if (file) {
+                    setForm(f => ({ ...f, image_file: file }));
+                  } else {
+                    setForm(f => {
+                      const newF = { ...f };
+                      delete newF.image_file;
+                      return newF;
+                    });
+                  }
+                }}
+              />
+              {form.image_file && typeof form.image_file === 'object' && (
+                <div style={{ fontSize: '11px', color: '#a78bfa', marginTop: '5px' }}>
+                  Selected: {form.image_file.name}
+                  <button type="button" onClick={() => setForm(f => { const newF = {...f}; delete newF.image_file; return newF; })} style={{ background: 'none', border: 'none', color: '#f87171', marginLeft: '8px', cursor: 'pointer', fontSize: '10px' }}>✕ Remove</button>
+                </div>
+              )}
+            </div>
+          </div>
 
           {/* 3D Model File Upload (.glb) */}
           <div style={{ marginBottom: '16px' }}>

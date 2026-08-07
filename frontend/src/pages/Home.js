@@ -1,12 +1,13 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
-import { mlAPI, ordersAPI } from '../services/api';
+import { mlAPI, ordersAPI, productsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
 
 const Home = () => {
   const { user } = useAuth();
   const [recommendations, setRecommendations] = useState([]);
+  const [dbFallback, setDbFallback] = useState([]);
   const [loading, setLoading] = useState(true);
   const [lastOrderTime, setLastOrderTime] = useState(null);
 
@@ -52,9 +53,15 @@ const Home = () => {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const recommendationsRes = await mlAPI.getRecommendations('knn', 6).catch(() => ({ data: { recommendations: [] } }));
+        const [recommendationsRes, productsRes] = await Promise.all([
+          mlAPI.getRecommendations('knn', 10).catch(() => ({ data: { recommendations: [] } })),
+          productsAPI.getAll({ limit: 10 })
+        ]);
         const recommendationsData = recommendationsRes.data.recommendations || [];
         setRecommendations(Array.isArray(recommendationsData) ? recommendationsData : []);
+        
+        const productsData = productsRes.data?.results || productsRes.data || [];
+        setDbFallback(Array.isArray(productsData) ? productsData : []);
       } catch (error) {
         console.error('Error fetching data:', error);
         setRecommendations([]);
@@ -106,58 +113,9 @@ const Home = () => {
     );
   }
 
-  const defaultProducts = [
-    {
-      id: 1,
-      name: 'Modern Sectional Sofa',
-      price: 1299.99,
-      image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
-      category: 'Living Room',
-      slug: 'modern-sectional-sofa'
-    },
-    {
-      id: 2,
-      name: 'Ergonomic Office Chair',
-      price: 299.99,
-      image_url: 'https://images.unsplash.com/photo-1541558869434-2840d308329a?w=600&h=450&fit=crop',
-      category: 'Office',
-      slug: 'ergonomic-office-chair'
-    },
-    {
-      id: 3,
-      name: 'Dining Table Set',
-      price: 899.99,
-      image_url: 'https://images.unsplash.com/photo-1549497538-303791108f95?w=600&h=450&fit=crop',
-      category: 'Dining Room',
-      slug: 'dining-table-set'
-    },
-    {
-      id: 4,
-      name: 'Queen Size Bed Frame',
-      price: 599.99,
-      image_url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&h=450&fit=crop',
-      category: 'Bedroom',
-      slug: 'queen-size-bed-frame'
-    },
-    {
-      id: 5,
-      name: 'Bookshelf Cabinet',
-      price: 399.99,
-      image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=450&fit=crop',
-      category: 'Storage',
-      slug: 'bookshelf-cabinet'
-    },
-    {
-      id: 6,
-      name: 'Executive Desk',
-      price: 799.99,
-      image_url: 'https://images.unsplash.com/photo-1541746972996-4e0b0f93e586?w=600&h=450&fit=crop',
-      category: 'Office',
-      slug: 'executive-desk'
-    }
-  ];
-
-  const displayList = recommendations.length > 0 ? recommendations : defaultProducts;
+  const availableFilter = (p) => p && p.available !== false && (p.stock === undefined || p.stock > 0);
+  const rawList = recommendations.length > 0 ? recommendations : dbFallback;
+  const displayList = rawList.filter(availableFilter).slice(0, 6);
 
   const collections = [
     {

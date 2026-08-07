@@ -1139,9 +1139,17 @@ def admin_create_product(request):
         return Response({'error': 'Admin access required'}, status=status.HTTP_403_FORBIDDEN)
     
     try:
-        # Get category by slug
-        category_slug = request.data.get('category', 'living-room')
-        category = get_object_or_404(Category, slug=category_slug)
+        # Get category robustly (by id, slug, or name)
+        cat_val = request.data.get('category', 'living-room')
+        category = None
+        if str(cat_val).isdigit():
+            category = Category.objects.filter(id=int(cat_val)).first()
+        if not category:
+            from django.db.models import Q
+            category = Category.objects.filter(Q(slug=cat_val) | Q(name__iexact=str(cat_val))).first()
+            
+        if not category:
+            return Response({'error': f'No Category matches the given query: {cat_val}'}, status=status.HTTP_400_BAD_REQUEST)
         
         # Generate unique slug
         base_slug = request.data.get('name', '').lower().replace(' ', '-').replace('--', '-')
@@ -1210,8 +1218,15 @@ def admin_update_product(request, product_id):
         
         # Update category
         if 'category' in request.data:
-            category = get_object_or_404(Category, slug=request.data['category'])
-            product.category = category
+            cat_val = request.data['category']
+            category = None
+            if str(cat_val).isdigit():
+                category = Category.objects.filter(id=int(cat_val)).first()
+            if not category:
+                from django.db.models import Q
+                category = Category.objects.filter(Q(slug=cat_val) | Q(name__iexact=str(cat_val))).first()
+            if category:
+                product.category = category
         
         product.save()
         serializer = ProductSerializer(product)
@@ -1578,8 +1593,12 @@ def vendor_create_product(request):
         )
 
         model_file = request.FILES.get('model_file')
-        if model_file:
-            product.model_file = model_file
+        image_file = request.FILES.get('image')
+        if model_file or image_file:
+            if model_file:
+                product.model_file = model_file
+            if image_file:
+                product.image = image_file
             product.save()
 
         return Response(ProductSerializer(product).data, status=status.HTTP_201_CREATED)
@@ -1620,9 +1639,13 @@ def vendor_update_product(request, product_id):
                 product.category = category
 
         model_file = request.FILES.get('model_file')
-        if model_file:
-            product.model_file = model_file
-
+        image_file = request.FILES.get('image')
+        if model_file or image_file:
+            if model_file:
+                product.model_file = model_file
+            if image_file:
+                product.image = image_file
+        
         product.save()
         return Response(ProductSerializer(product).data)
     except Exception as e:

@@ -74,14 +74,14 @@ const ProductCard = ({ product }) => {
       >
         <Link to={`/products/${product.slug}`} tabIndex={-1} aria-label={`View ${product.name}`}>
           <img
-            src={product.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&h=400&fit=crop'}
+            src={product.image || product.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&h=400&fit=crop'}
             className="product-image"
             alt={product.name}
             loading="lazy"
             style={{
               width: '100%',
               height: '100%',
-              objectFit: 'cover',
+              objectFit: 'contain',
               transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
             }}
           />
@@ -230,7 +230,7 @@ const ProductCard = ({ product }) => {
           onMouseEnter={(e) => {
             if (!isOutOfStock && !adding) {
               e.currentTarget.style.background = 'var(--ink)';
-              e.currentTarget.style.color = '#fff';
+              e.currentTarget.style.color = 'var(--bg-white)';
             }
           }}
           onMouseLeave={(e) => {
