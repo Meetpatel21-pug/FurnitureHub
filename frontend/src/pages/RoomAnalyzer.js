@@ -276,7 +276,7 @@ const RoomAnalyzer = () => {
                         <div className="d-flex gap-3 p-3 rounded-4 border" style={{ background: 'rgba(15,23,42,0.7)', borderColor: 'rgba(255,255,255,0.08)' }}>
                           <div style={{ width: '96px', flexShrink: 0 }}>
                             <img
-                              src={resolveMediaUrl(product.image_url) || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop'}
+                              src={resolveMediaUrl(product.image || product.image_url) || 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop'}
                               alt={product.name}
                               className="rounded-3 w-100 h-100"
                               style={{ objectFit: 'cover', aspectRatio: '1 / 1' }}
@@ -285,7 +285,7 @@ const RoomAnalyzer = () => {
                           <div className="flex-grow-1">
                             <div className="d-flex justify-content-between gap-3">
                               <div>
-                                <div className="text-white-50 small mb-1">{product.category || 'Furniture'}</div>
+                                <div className="text-white-50 small mb-1">{(typeof product.category === 'object' && product.category !== null ? product.category.name : product.category) || 'Furniture'}</div>
                                 <h4 className="h5 text-white mb-1">{product.name}</h4>
                               </div>
                               <div className="text-end">

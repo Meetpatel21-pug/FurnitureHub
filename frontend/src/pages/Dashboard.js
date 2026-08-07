@@ -760,7 +760,7 @@ const Dashboard = () => {
                               <span className="badge bg-primary">{product.knn_score?.toFixed(1) || (9.5 - index * 0.5).toFixed(1)}</span>
                             </div>
                             <p className="text-primary fw-bold mb-1">₹{parseFloat(product.price).toFixed(0)}</p>
-                            <small className="text-muted">{product.category}</small>
+                            <small className="text-muted">{(typeof product.category === 'object' && product.category !== null ? product.category.name : product.category) || 'N/A'}</small>
                             <div className="progress mt-2" style={{height: '4px'}}>
                               <div 
                                 className="progress-bar bg-success" 

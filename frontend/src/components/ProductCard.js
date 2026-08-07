@@ -47,7 +47,9 @@ const ProductCard = ({ product }) => {
   const inWishlist   = isInWishlist(product.id);
   const rating       = product.average_rating || 4.2;
   const reviewCount  = product.review_count   || 0;
-  const categoryName = product.category?.name || product.category || 'Furniture';
+  const categoryName = typeof product.category === 'object' && product.category !== null 
+    ? (product.category.name || 'Furniture')
+    : (product.category || 'Furniture');
   const isOutOfStock = product.available === false || (product.stock !== undefined && product.stock <= 0);
 
   return (

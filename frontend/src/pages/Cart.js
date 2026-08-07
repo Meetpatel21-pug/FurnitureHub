@@ -108,7 +108,7 @@ const Cart = () => {
                       </div>
                       <div className="col-4">
                         <h6 className="mb-0">{item.product.name}</h6>
-                        <small className="text-muted">{item.product.category?.name}</small>
+                        <small className="text-muted">{(typeof item.product.category === 'object' && item.product.category !== null ? item.product.category.name : item.product.category) || 'N/A'}</small>
                       </div>
                       <div className="col-2">
                         <div className="input-group input-group-sm">
