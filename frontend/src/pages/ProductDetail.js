@@ -1,5 +1,5 @@
 import React, { Suspense, lazy, useEffect, useMemo, useState } from 'react';
-import { useParams, useNavigate } from 'react-router-dom';
+import { useParams, useNavigate, Link } from 'react-router-dom';
 import { productsAPI, reviewsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import { useCart } from '../context/CartContext';
@@ -40,8 +40,6 @@ const ProductDetail = () => {
       distribution,
     };
   }, [reviews, product?.average_rating]);
-
-  const recentReviews = useMemo(() => reviews.slice(0, 3), [reviews]);
 
   const modelUrl = product?.model_url || product?.model_file;
   const previewImageUrl = product?.image_url || product?.image;
@@ -107,7 +105,7 @@ const ProductDetail = () => {
       await reviewsAPI.add(product.id, reviewForm);
       toast.success('Review added successfully!');
       setReviewForm({ rating: 5, comment: '' });
-      fetchProduct(); // Refresh to get updated reviews
+      fetchProduct();
     } catch (error) {
       toast.error('Failed to add review');
     }
@@ -119,7 +117,8 @@ const ProductDetail = () => {
       stars.push(
         <i
           key={i}
-          className={`fas fa-star ${i <= rating ? 'text-warning' : 'text-muted'}`}
+          className={`fas fa-star ${i <= rating ? 'text-warning' : 'text-secondary'}`}
+          style={{ fontSize: '13px', margin: '0 1px' }}
         ></i>
       );
     }
@@ -128,12 +127,12 @@ const ProductDetail = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{height: '100vh', paddingTop: '100px'}}>
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '100vh', background: '#000000', paddingTop: '100px' }}>
         <div className="text-center">
-          <div className="spinner-border text-primary mb-3" role="status" style={{width: '3rem', height: '3rem'}}>
+          <div className="spinner-border text-light mb-3" role="status" style={{ width: '3rem', height: '3rem' }}>
             <span className="visually-hidden">Loading...</span>
           </div>
-          <h4>Loading Product...</h4>
+          <h4 style={{ color: 'rgba(255,255,255,0.6)', fontWeight: 400, letterSpacing: '0.05em' }}>Loading Product Details...</h4>
         </div>
       </div>
     );
@@ -141,112 +140,179 @@ const ProductDetail = () => {
 
   if (!product) {
     return (
-      <div className="container py-5 text-center">
-        <h2>Product not found</h2>
+      <div style={{ background: '#000000', minHeight: '100vh', paddingTop: '120px' }}>
+        <div className="container py-5 text-center">
+          <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '16px', padding: '60px 24px', maxWidth: '440px', margin: '0 auto' }}>
+            <i className="fas fa-couch fa-3x mb-3" style={{ color: 'rgba(255,255,255,0.25)' }}></i>
+            <h2 style={{ color: '#fff', fontFamily: 'var(--font-serif)', fontSize: '2rem', fontWeight: 400, marginBottom: '12px' }}>Product Not Found</h2>
+            <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '14px', marginBottom: '24px' }}>The product you are looking for does not exist or has been removed.</p>
+            <Link to="/products" className="btn btn-light px-4 py-2" style={{ fontWeight: 700, textTransform: 'uppercase', letterSpacing: '0.08em', fontSize: '12px' }}>
+              Browse Catalog
+            </Link>
+          </div>
+        </div>
       </div>
     );
   }
 
   return (
-    <div style={{paddingTop: '100px'}}>
+    <div style={{ background: '#000000', minHeight: '100vh', paddingTop: '90px', color: '#ffffff' }}>
       {/* Product Hero Section */}
-      <section className="py-5 bg-light">
-        <div className="container">
-          <div className="row g-5 align-items-center">
+      <section className="py-5" style={{ background: '#000000' }}>
+        <div className="container" style={{ maxWidth: '1280px' }}>
+          <div className="row g-5 align-items-stretch">
+            {/* Left: 3D Viewer & Media */}
             <div className="col-lg-6">
-              <Suspense
-                fallback={
-                  <div className="furniture-viewer-surface shadow-lg">
-                    <div className="furniture-viewer-loader">
-                      <div className="spinner-border text-info mb-3" role="status" aria-label="Loading 3D viewer" />
-                      <h5 className="mb-2 text-dark">Loading 3D furniture viewer</h5>
-                      <p className="text-muted mb-0">Preparing model and lighting...</p>
+              <div style={{ background: '#0a0a0a', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '24px', height: '100%', minHeight: '440px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+                <Suspense
+                  fallback={
+                    <div style={{ minHeight: '380px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+                      <div className="spinner-border text-light mb-3" role="status" style={{ width: '2.5rem', height: '2.5rem' }} />
+                      <h5 style={{ color: '#fff', fontWeight: 400 }}>Loading 3D Furniture Viewer</h5>
+                      <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px' }}>Preparing 3D model geometry...</p>
                     </div>
-                  </div>
-                }
-              >
-                <FurnitureViewer
-                  name={product.name}
-                  category={product.category?.name}
-                  modelUrl={modelUrl}
-                  posterUrl={previewImageUrl}
-                  fallbackImage={previewImageUrl}
-                  className="shadow-lg"
-                />
-              </Suspense>
+                  }
+                >
+                  <FurnitureViewer
+                    name={product.name}
+                    category={product.category?.name}
+                    modelUrl={modelUrl}
+                    posterUrl={previewImageUrl}
+                    fallbackImage={previewImageUrl}
+                  />
+                </Suspense>
+              </div>
             </div>
+
+            {/* Right: Product Meta & Purchase Panel */}
             <div className="col-lg-6">
-              <div className="modern-product-card h-100">
-                <div className="product-content p-4">
-                  <div className="d-flex align-items-center mb-3">
-                    <span className="badge bg-primary text-white px-3 py-2 rounded-pill me-3">
-                      <i className="fas fa-tag me-1"></i>{product.category?.name || 'Furniture'}
-                    </span>
-                    <div className="product-rating">
-                      <div className="stars me-2">
+              <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '20px', padding: '36px', height: '100%', display: 'flex', flexDirection: 'column', justifyContent: 'space-between' }}>
+                <div>
+                  {/* Category & Ratings & Seller Badge */}
+                  <div className="d-flex align-items-center justify-content-between flex-wrap gap-2 mb-3">
+                    <div className="d-flex align-items-center gap-2">
+                      <span style={{ background: 'rgba(255,255,255,0.1)', color: '#fff', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', padding: '5px 14px', borderRadius: '20px', border: '1px solid rgba(255,255,255,0.15)' }}>
+                        <i className="fas fa-tag me-2" style={{ fontSize: '10px' }}></i>{product.category?.name || 'Furniture'}
+                      </span>
+                      {product.vendor_info && (
+                        <span style={{ background: 'rgba(167,139,250,0.15)', color: '#a78bfa', fontSize: '11px', fontWeight: 600, padding: '5px 14px', borderRadius: '20px', border: '1px solid rgba(167,139,250,0.3)' }}>
+                          <i className="fas fa-store me-1"></i> {product.vendor_info.store_name}
+                        </span>
+                      )}
+                    </div>
+                    
+                    <div className="d-flex align-items-center gap-2">
+                      <div className="d-flex">
                         {renderStars(Math.round(product.average_rating || 4.5))}
                       </div>
-                      <span className="rating-count text-muted">({product.review_count || Math.floor(Math.random() * 8) + 2})</span>
+                      <span style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px' }}>
+                        ({product.review_count || reviews.length || 0} reviews)
+                      </span>
                     </div>
                   </div>
                   
-                  <h1 className="product-title mb-4 display-4 fw-bold text-dark">{product.name}</h1>
+                  {/* Product Title */}
+                  <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 3.5vw, 2.8rem)', fontWeight: 400, color: '#ffffff', lineHeight: 1.15, marginBottom: '20px' }}>
+                    {product.name}
+                  </h1>
                   
-                  <div className="price-section mb-4 p-3 bg-light rounded-3">
-                    <div className="d-flex align-items-center">
-                      <span className="current-price display-4 fw-bold text-success me-3">₹{parseFloat(product.price).toFixed(0)}</span>
+                  {/* Price Banner */}
+                  <div style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '20px', marginBottom: '24px' }}>
+                    <div className="d-flex align-items-center justify-content-between flex-wrap gap-3">
                       <div>
-                        <small className="text-muted d-block">Best Price Guaranteed</small>
-                        <small className="text-success"><i className="fas fa-shipping-fast me-1"></i>Free Delivery</small>
+                        <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', display: 'block', marginBottom: '4px' }}>
+                          Guaranteed Price
+                        </span>
+                        <span style={{ fontSize: '2.5rem', fontWeight: 700, color: '#ffffff', lineHeight: 1, letterSpacing: '-0.02em' }}>
+                          ₹{parseFloat(product.price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                        </span>
+                      </div>
+                      <div className="text-end">
+                        <div style={{ color: '#4ade80', fontSize: '12px', fontWeight: 600, marginBottom: '2px' }}>
+                          <i className="fas fa-shipping-fast me-1"></i> Free Express Delivery
+                        </div>
+                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px' }}>
+                          <i className="fas fa-shield-alt me-1"></i> 5-Year Structural Warranty
+                        </div>
                       </div>
                     </div>
                   </div>
                   
-                  <div className="description-section mb-4">
-                    <h5 className="text-dark mb-2">Product Details</h5>
-                    <p className="text-muted" style={{fontSize: '1.1rem', lineHeight: '1.6'}}>{product.description}</p>
+                  {/* Product Description */}
+                  <div className="mb-4">
+                    <h5 style={{ fontSize: '11px', fontWeight: 700, letterSpacing: '0.15em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '10px' }}>
+                      Product Details
+                    </h5>
+                    <p style={{ color: 'rgba(255,255,255,0.65)', fontSize: '14px', lineHeight: 1.7, margin: 0 }}>
+                      {product.description}
+                    </p>
                   </div>
                   
-                  <div className="stock-section mb-4">
+                  {/* Stock Availability Indicator */}
+                  <div className="mb-4">
                     {product.stock > 0 ? (
-                      <div className="alert alert-success d-flex align-items-center" role="alert">
-                        <i className="fas fa-check-circle fa-lg me-3 text-success"></i>
+                      <div style={{ background: 'rgba(74,222,128,0.1)', border: '1px solid rgba(74,222,128,0.25)', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <i className="fas fa-check-circle" style={{ color: '#4ade80', fontSize: '20px' }}></i>
                         <div>
-                          <strong>In Stock</strong>
-                          <div className="small">{product.stock} units available • Ready to ship</div>
+                          <strong style={{ color: '#4ade80', fontSize: '13px' }}>In Stock</strong>
+                          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>{product.stock} units available • Ready for dispatch</div>
                         </div>
                       </div>
                     ) : (
-                      <div className="alert alert-danger d-flex align-items-center" role="alert">
-                        <i className="fas fa-times-circle fa-lg me-3 text-danger"></i>
+                      <div style={{ background: 'rgba(248,113,113,0.1)', border: '1px solid rgba(248,113,113,0.25)', borderRadius: '12px', padding: '14px 18px', display: 'flex', alignItems: 'center', gap: '14px' }}>
+                        <i className="fas fa-times-circle" style={{ color: '#f87171', fontSize: '20px' }}></i>
                         <div>
-                          <strong>Out of Stock</strong>
-                          <div className="small">Notify me when available</div>
+                          <strong style={{ color: '#f87171', fontSize: '13px' }}>Currently Out of Stock</strong>
+                          <div style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px' }}>Check back soon or explore similar items</div>
                         </div>
                       </div>
                     )}
                   </div>
+                </div>
 
-                  <div className="action-section">
-                    <div className="d-grid gap-3">
-                      <button
-                        className="btn btn-dark btn-lg py-3 fw-bold"
-                        onClick={handleAddToCart}
-                        disabled={!product.available || product.stock === 0}
-                        style={{fontSize: '1.1rem'}}
-                      >
-                        <i className="fas fa-shopping-cart me-2"></i>
-                        Add to Cart - ₹{parseFloat(product.price).toFixed(0)}
-                      </button>
-                      <button
-                        className={`btn btn-outline-dark btn-lg w-100 py-3 ${isInWishlist(product.id) ? 'wishlist-active' : ''}`}
-                        onClick={handleAddToWishlist}
-                      >
-                        <i className={isInWishlist(product.id) ? 'fas fa-heart me-2' : 'far fa-heart me-2'}></i>
-                        {isInWishlist(product.id) ? 'Wishlisted' : 'Wishlist'}
-                      </button>
-                    </div>
-                  </div>
+                {/* Call to Actions */}
+                <div className="d-grid gap-3 pt-3" style={{ borderTop: '1px solid rgba(255,255,255,0.08)' }}>
+                  <button
+                    onClick={handleAddToCart}
+                    disabled={!product.available || product.stock === 0}
+                    style={{
+                      background: '#ffffff',
+                      color: '#000000',
+                      border: 'none',
+                      borderRadius: '10px',
+                      padding: '16px',
+                      fontSize: '12px',
+                      fontWeight: 700,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      cursor: (!product.available || product.stock === 0) ? 'not-allowed' : 'pointer',
+                      opacity: (!product.available || product.stock === 0) ? 0.5 : 1,
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <i className="fas fa-shopping-cart me-2"></i>
+                    Add to Cart — ₹{parseFloat(product.price).toLocaleString('en-IN', { maximumFractionDigits: 0 })}
+                  </button>
+
+                  <button
+                    onClick={handleAddToWishlist}
+                    style={{
+                      background: 'transparent',
+                      color: isInWishlist(product.id) ? '#f87171' : 'rgba(255,255,255,0.7)',
+                      border: `1px solid ${isInWishlist(product.id) ? 'rgba(248,113,113,0.5)' : 'rgba(255,255,255,0.18)'}`,
+                      borderRadius: '10px',
+                      padding: '14px',
+                      fontSize: '12px',
+                      fontWeight: 600,
+                      letterSpacing: '0.08em',
+                      textTransform: 'uppercase',
+                      cursor: 'pointer',
+                      transition: 'all 0.2s ease',
+                    }}
+                  >
+                    <i className={isInWishlist(product.id) ? 'fas fa-heart me-2' : 'far fa-heart me-2'}></i>
+                    {isInWishlist(product.id) ? 'Saved in Wishlist' : 'Add to Wishlist'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -254,167 +320,165 @@ const ProductDetail = () => {
         </div>
       </section>
 
-      <section className="py-4 bg-white border-top border-bottom">
-        <div className="container">
-          <div className="row g-3 text-center">
-            <div className="col-md-4">
-              <div className="p-3 rounded-4 bg-light h-100">
-                <div className="fw-bold mb-1">Desktop</div>
-                <div className="text-muted small">Interact with the embedded 3D model and place the item in the room designer.</div>
-              </div>
+      {/* Feature Highlights Bar */}
+      <section className="py-4" style={{ background: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.06)', borderBottom: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="container" style={{ maxWidth: '1280px' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '16px', textAlign: 'center' }}>
+            <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '22px 18px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <i className="fas fa-cube" style={{ fontSize: '1.4rem', color: '#ffffff', marginBottom: '10px' }}></i>
+              <div style={{ color: '#ffffff', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>Interactive 3D Preview</div>
+              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', lineHeight: 1.5 }}>Rotate, zoom, and inspect full 360° product details directly on screen.</div>
             </div>
-            <div className="col-md-4">
-              <div className="p-3 rounded-4 bg-light h-100">
-                <div className="fw-bold mb-1">Mobile</div>
-                <div className="text-muted small">Tap the AR launcher on supported devices or stay in 3D preview mode.</div>
-              </div>
+
+            <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '22px 18px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <i className="fas fa-mobile-alt" style={{ fontSize: '1.4rem', color: '#ffffff', marginBottom: '10px' }}></i>
+              <div style={{ color: '#ffffff', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>Augmented Reality (AR)</div>
+              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', lineHeight: 1.5 }}>View this furniture in your actual room using your smartphone camera.</div>
             </div>
-            <div className="col-md-4">
-              <div className="p-3 rounded-4 bg-light h-100">
-                <div className="fw-bold mb-1">Saved visual assets</div>
-                <div className="text-muted small">Product models and dimensions now flow from the backend serializer.</div>
-              </div>
+
+            <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '22px 18px', display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center' }}>
+              <i className="fas fa-magic" style={{ fontSize: '1.4rem', color: '#ffffff', marginBottom: '10px' }}></i>
+              <div style={{ color: '#ffffff', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>Room AI Compatible</div>
+              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', lineHeight: 1.5 }}>Auto-matches with room scans using our FurnitureHub AI designer.</div>
             </div>
           </div>
         </div>
       </section>
 
       {/* Reviews Section */}
-      <section className="py-5" style={{background: 'white'}}>
-        <div className="container">
+      <section className="py-5" style={{ background: '#000000' }}>
+        <div className="container" style={{ maxWidth: '1000px' }}>
           <div className="text-center mb-5">
-            <p className="text-uppercase fw-semibold mb-2" style={{ letterSpacing: '0.16em', color: '#0f766e' }}>Customer Stories</p>
-            <h2 className="fw-bold text-dark">Customer Ratings & Reviews</h2>
-            <p className="text-muted">What our customers say about this product</p>
+            <span style={{ fontSize: '10px', fontWeight: 700, letterSpacing: '0.22em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.35)', display: 'block', marginBottom: '8px' }}>
+              Verified Feedback
+            </span>
+            <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: '2.4rem', fontWeight: 400, color: '#ffffff', margin: 0 }}>
+              Customer Reviews
+            </h2>
+            <p style={{ color: 'rgba(255,255,255,0.45)', fontSize: '14px', marginTop: '6px' }}>What buyers say about this furniture piece</p>
           </div>
 
-          <div className="row g-4 align-items-stretch mb-5">
-            <div className="col-lg-4">
-              <div className="modern-product-card h-100 bg-white border shadow-sm">
-                <div className="product-content p-4 text-center">
-                  <div className="rounded-4 p-4 mb-3" style={{ background: 'var(--grad-accent)', color: '#fff' }}>
-                    <div className="display-4 fw-bold mb-1">{reviewStats.averageRating.toFixed(1)}</div>
-                    <div className="d-flex justify-content-center gap-1 fs-5">
-                      {renderStars(Math.round(reviewStats.averageRating || 0))}
-                    </div>
-                  </div>
-                  <div className="d-flex justify-content-between text-muted small px-2">
-                    <span>{reviewStats.totalReviews} reviews</span>
-                    <span>{Math.round(reviewStats.averageRating * 20) || 0}% positive</span>
-                  </div>
-                </div>
+          <div style={{ display: 'grid', gridTemplateColumns: '280px 1fr', gap: '20px', alignItems: 'stretch', marginBottom: '40px' }}>
+            {/* Average Rating Card */}
+            <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '32px 24px', textAlign: 'center', display: 'flex', flexDirection: 'column', justifyContent: 'center', alignItems: 'center' }}>
+              <div style={{ fontSize: '3.5rem', fontWeight: 700, color: '#ffffff', lineHeight: 1, marginBottom: '8px' }}>
+                {reviewStats.averageRating.toFixed(1)}
+              </div>
+              <div className="d-flex justify-content-center mb-3">
+                {renderStars(Math.round(reviewStats.averageRating || 0))}
+              </div>
+              <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px' }}>
+                Based on {reviewStats.totalReviews} customer reviews
               </div>
             </div>
 
-            <div className="col-lg-8">
-              <div className="modern-product-card h-100 bg-white border shadow-sm">
-                <div className="product-content p-4">
-                  <div className="d-flex justify-content-between align-items-center mb-3">
-                    <h4 className="product-title mb-0 text-dark">Rating Breakdown</h4>
-                    <span className="text-muted small">Based on approved reviews</span>
+            {/* Rating Breakdown */}
+            <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '28px', display: 'flex', flexDirection: 'column', justifyContent: 'center' }}>
+              <h4 style={{ fontSize: '12px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.4)', marginBottom: '20px' }}>
+                Rating Distribution
+              </h4>
+              <div className="d-grid gap-3">
+                {reviewStats.distribution.map((item) => (
+                  <div key={item.rating} className="d-flex align-items-center gap-3">
+                    <div style={{ width: '60px', color: 'rgba(255,255,255,0.7)', fontSize: '12px', fontWeight: 600 }}>
+                      {item.rating} ★
+                    </div>
+                    <div className="progress flex-grow-1" style={{ height: '6px', background: 'rgba(255,255,255,0.08)', borderRadius: '3px', overflow: 'hidden' }}>
+                      <div
+                        style={{
+                          width: `${Math.max(item.percent, item.count > 0 ? 6 : 0)}%`,
+                          background: item.rating >= 4 ? '#4ade80' : item.rating === 3 ? '#facc15' : '#f87171',
+                          height: '100%',
+                          borderRadius: '3px',
+                          transition: 'width 0.3s ease',
+                        }}
+                      />
+                    </div>
+                    <div style={{ width: '32px', textAlign: 'right', color: 'rgba(255,255,255,0.4)', fontSize: '12px' }}>
+                      {item.count}
+                    </div>
                   </div>
-                  <div className="d-grid gap-3">
-                    {reviewStats.distribution.map((item) => (
-                      <div key={item.rating} className="d-flex align-items-center gap-3">
-                        <div style={{ width: '84px' }} className="text-dark fw-semibold">
-                          {item.rating} star{item.rating > 1 ? 's' : ''}
-                        </div>
-                        <div className="progress flex-grow-1" style={{ height: '10px', background: '#e9ecef' }}>
-                          <div
-                            className="progress-bar"
-                            role="progressbar"
-                            style={{ width: `${Math.max(item.percent, item.count > 0 ? 8 : 0)}%`, background: item.rating >= 4 ? 'var(--accent)' : item.rating === 3 ? '#f59e0b' : '#ef4444' }}
-                            aria-valuenow={item.percent}
-                            aria-valuemin="0"
-                            aria-valuemax="100"
-                          />
-                        </div>
-                        <div style={{ width: '44px' }} className="text-end text-muted">
-                          {item.count}
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </div>
+                ))}
               </div>
             </div>
           </div>
 
           {/* Add Review Form */}
           {isAuthenticated && (
-            <div className="modern-product-card mb-5">
-              <div className="product-content">
-                <h4 className="product-title mb-4 text-dark">Write a Review</h4>
-                <form onSubmit={handleReviewSubmit}>
-                  <div className="row g-3">
-                    <div className="col-md-6">
-                      <label className="form-label text-dark">Rating</label>
-                      <select
-                        className="form-control border-dark"
-                        value={reviewForm.rating}
-                        onChange={(e) => setReviewForm({...reviewForm, rating: parseInt(e.target.value)})}
-                        style={{color: '#333'}}
-                      >
-                        {[5,4,3,2,1].map(num => (
-                          <option key={num} value={num}>{num} Star{num > 1 ? 's' : ''}</option>
-                        ))}
-                      </select>
-                    </div>
-                    <div className="col-12">
-                      <label className="form-label text-dark">Comment</label>
-                      <textarea
-                        className="form-control border-dark"
-                        rows="4"
-                        value={reviewForm.comment}
-                        onChange={(e) => setReviewForm({...reviewForm, comment: e.target.value})}
-                        style={{color: '#333'}}
-                        placeholder="Share your experience with this product..."
-                        required
-                      ></textarea>
-                    </div>
-                    <div className="col-12 text-center">
-                      <button type="submit" className="btn btn-dark btn-lg px-5 py-3">
-                        <i className="fas fa-star me-2"></i>Submit Review
-                      </button>
-                    </div>
+            <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.08)', borderRadius: '16px', padding: '32px', marginBottom: '40px' }}>
+              <h4 style={{ fontFamily: 'var(--font-serif)', fontSize: '1.4rem', fontWeight: 400, color: '#ffffff', marginBottom: '20px' }}>
+                Write a Customer Review
+              </h4>
+              <form onSubmit={handleReviewSubmit}>
+                <div className="row g-3">
+                  <div className="col-md-6 mb-3">
+                    <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: '8px' }}>
+                      Rating
+                    </label>
+                    <select
+                      value={reviewForm.rating}
+                      onChange={(e) => setReviewForm({ ...reviewForm, rating: parseInt(e.target.value) })}
+                      style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)', color: '#ffffff', borderRadius: '8px', padding: '11px 14px', fontSize: '13px', width: '100%', outline: 'none' }}
+                    >
+                      {[5, 4, 3, 2, 1].map(num => (
+                        <option key={num} value={num}>{num} Star{num > 1 ? 's' : ''} ({'★'.repeat(num)})</option>
+                      ))}
+                    </select>
                   </div>
-                </form>
-              </div>
+                  <div className="col-12 mb-3">
+                    <label style={{ display: 'block', fontSize: '10px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', color: 'rgba(255,255,255,0.45)', marginBottom: '8px' }}>
+                      Your Review
+                    </label>
+                    <textarea
+                      rows="4"
+                      value={reviewForm.comment}
+                      onChange={(e) => setReviewForm({ ...reviewForm, comment: e.target.value })}
+                      placeholder="Share your experience with quality, comfort, and delivery of this product..."
+                      required
+                      style={{ background: '#1a1a1a', border: '1px solid rgba(255,255,255,0.12)', color: '#ffffff', borderRadius: '8px', padding: '14px', fontSize: '13px', width: '100%', outline: 'none', resize: 'vertical' }}
+                    />
+                  </div>
+                  <div className="col-12 text-end">
+                    <button
+                      type="submit"
+                      style={{ background: '#ffffff', color: '#000000', border: 'none', borderRadius: '8px', padding: '12px 32px', fontSize: '11px', fontWeight: 700, letterSpacing: '0.12em', textTransform: 'uppercase', cursor: 'pointer' }}
+                    >
+                      Submit Review
+                    </button>
+                  </div>
+                </div>
+              </form>
             </div>
           )}
 
           {/* Reviews List */}
-          <div className="row g-3">
+          <div className="d-grid gap-3">
             {reviews.length > 0 ? (
               reviews.map(review => (
-                <div key={review.id} className="col-12">
-                  <div className="modern-product-card" style={{ background: 'var(--bg-white)', border: '1px solid var(--border)' }}>
-                    <div className="product-content p-4">
-                      <div className="d-flex justify-content-between align-items-start mb-2">
-                        <div>
-                          <h6 className="product-title mb-1" style={{ color: 'var(--ink)' }}>{review.user?.first_name || review.user?.username} {review.user?.last_name || ''}</h6>
-                          <div className="product-rating">
-                            <div className="stars">
-                              {renderStars(review.rating)}
-                            </div>
-                          </div>
-                        </div>
-                        <small className="text-muted" style={{ fontSize: '12px' }}>{new Date(review.created_at).toLocaleDateString()}</small>
+                <div key={review.id} style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.07)', borderRadius: '14px', padding: '24px' }}>
+                  <div className="d-flex justify-content-between align-items-start mb-2">
+                    <div>
+                      <h6 style={{ color: '#ffffff', fontWeight: 600, fontSize: '14px', marginBottom: '4px' }}>
+                        {review.user?.first_name || review.user?.username} {review.user?.last_name || ''}
+                      </h6>
+                      <div className="d-flex gap-1">
+                        {renderStars(review.rating)}
                       </div>
-                      <p style={{ color: 'var(--ink-muted)', margin: 0, fontSize: '14px', lineHeight: '1.6' }}>{review.comment}</p>
                     </div>
+                    <span style={{ color: 'rgba(255,255,255,0.35)', fontSize: '12px' }}>
+                      {new Date(review.created_at).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })}
+                    </span>
                   </div>
+                  <p style={{ color: 'rgba(255,255,255,0.65)', margin: 0, fontSize: '13px', lineHeight: 1.65 }}>
+                    {review.comment}
+                  </p>
                 </div>
               ))
             ) : (
-              <div className="col-12 text-center">
-                <div className="modern-product-card" style={{ background: 'var(--bg-white)', border: '1px solid var(--border)' }}>
-                  <div className="product-content p-4">
-                    <i className="fas fa-comments fa-3x text-muted mb-3"></i>
-                    <h5 className="product-title text-dark">No Reviews Yet</h5>
-                    <p className="text-muted">Be the first to review this product and help other customers!</p>
-                  </div>
-                </div>
+              <div style={{ background: '#121212', border: '1px solid rgba(255,255,255,0.06)', borderRadius: '14px', padding: '44px 24px', textAlign: 'center' }}>
+                <i className="fas fa-comments fa-2x mb-3" style={{ color: 'rgba(255,255,255,0.2)' }}></i>
+                <h5 style={{ color: '#ffffff', fontWeight: 400, fontFamily: 'var(--font-serif)', fontSize: '1.2rem', marginBottom: '6px' }}>No Reviews Yet</h5>
+                <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '13px', margin: 0 }}>Be the first customer to leave a review for this product!</p>
               </div>
             )}
           </div>

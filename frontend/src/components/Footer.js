@@ -165,13 +165,11 @@ const Footer = () => {
               CLIENT SERVICE &amp; LEGAL
             </h6>
             <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              {['FAQ', 'Contact Us', 'Privacy Policy', 'Terms of Use', 'Room AI Generator'].map((item) => (
-                <li key={item}>
-                  <a href="#" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '12px' }}>
-                    {item}
-                  </a>
-                </li>
-              ))}
+              <li><Link to="/become-a-seller" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '12px' }}>Become a Seller</Link></li>
+              <li><Link to="/seller-dashboard" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '12px' }}>Seller Dashboard</Link></li>
+              <li><Link to="/admin-panel" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '12px' }}>Admin Panel</Link></li>
+              <li><Link to="/room-ai" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '12px' }}>Room AI Generator</Link></li>
+              <li><Link to="/contact" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '12px' }}>Contact Us</Link></li>
             </ul>
           </div>
         </div>

@@ -37,11 +37,11 @@ try:
 except ImportError:  # pragma: no cover - dependency may be missing in some environments
     truststore = None
 
-from .models import Category, Product, Cart, CartItem, Wishlist, Order, OrderItem, Review, UserProfile
+from .models import Category, Product, Cart, CartItem, Wishlist, Order, OrderItem, Review, UserProfile, Vendor
 from .serializers import (
     CategorySerializer, ProductSerializer, CartSerializer, CartItemSerializer,
     WishlistSerializer, OrderSerializer, ReviewSerializer, UserProfileSerializer,
-    UserRegistrationSerializer, UserSerializer
+    UserRegistrationSerializer, UserSerializer, VendorSerializer
 )
 from .room_ai import analyze_room_image
 
@@ -1464,3 +1464,257 @@ def download_invoice(request, order_id):
     response = HttpResponse(buffer, content_type='application/pdf')
     response['Content-Disposition'] = f'attachment; filename="invoice_{order.order_id}.pdf"'
     return response
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# VENDOR / MULTI-SELLER VIEWS
+# ─────────────────────────────────────────────────────────────────────────────
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def vendor_register(request):
+    """Register current user as a vendor (creates pending application)."""
+    if hasattr(request.user, 'vendor_profile'):
+        return Response({'error': 'You are already registered as a vendor.'}, status=status.HTTP_400_BAD_REQUEST)
+    data = request.data.copy()
+    if not data.get('store_name'):
+        return Response({'error': 'store_name is required.'}, status=status.HTTP_400_BAD_REQUEST)
+    vendor = Vendor.objects.create(
+        user=request.user,
+        store_name=data.get('store_name', ''),
+        store_description=data.get('store_description', ''),
+        logo_url=data.get('logo_url') or None,
+        phone=data.get('phone', ''),
+        address=data.get('address', ''),
+        city=data.get('city', ''),
+        state=data.get('state', ''),
+        status='pending',
+    )
+    return Response(VendorSerializer(vendor).data, status=status.HTTP_201_CREATED)
+
+
+@api_view(['GET', 'PUT'])
+@permission_classes([IsAuthenticated])
+def vendor_profile(request):
+    """Get or update the current user's vendor profile."""
+    vendor = get_object_or_404(Vendor, user=request.user)
+    if request.method == 'GET':
+        return Response(VendorSerializer(vendor).data)
+    # PUT
+    allowed = ['store_name', 'store_description', 'logo_url', 'phone', 'address', 'city', 'state']
+    for field in allowed:
+        if field in request.data:
+            setattr(vendor, field, request.data[field])
+    vendor.save()
+    return Response(VendorSerializer(vendor).data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def vendor_products(request):
+    """List the vendor's own products."""
+    vendor = get_object_or_404(Vendor, user=request.user)
+    products = Product.objects.filter(vendor=vendor).select_related('category')
+    serializer = ProductSerializer(products, many=True)
+    return Response(serializer.data)
+
+
+@api_view(['POST'])
+@permission_classes([IsAuthenticated])
+def vendor_create_product(request):
+    """Create a new product owned by the vendor."""
+    try:
+        vendor = get_object_or_404(Vendor, user=request.user)
+        if not vendor.is_approved:
+            return Response({'error': 'Your vendor account must be approved before adding products.'}, status=status.HTTP_403_FORBIDDEN)
+        
+        data = request.data
+        name = data.get('name')
+        price = data.get('price')
+        if not name or not price:
+            return Response({'error': 'Product name and price are required.'}, status=status.HTTP_400_BAD_REQUEST)
+        
+        # Flexible Category Lookup (by ID, slug, or name)
+        cat_val = data.get('category')
+        category = None
+        if cat_val:
+            if str(cat_val).isdigit():
+                category = Category.objects.filter(id=int(cat_val)).first()
+            if not category:
+                category = Category.objects.filter(Q(slug=cat_val) | Q(name__iexact=str(cat_val))).first()
+        
+        if not category:
+            category = Category.objects.first() # Default fallback to first category if available
+        if not category:
+            return Response({'error': 'No product categories available. Please create a category first.'}, status=status.HTTP_400_BAD_REQUEST)
+
+        # Generate unique slug
+        import re
+        slug = data.get('slug') or re.sub(r'[^a-z0-9]+', '-', str(name).lower()).strip('-')
+        base_slug = slug or 'product'
+        counter = 1
+        while Product.objects.filter(slug=slug).exists():
+            slug = f"{base_slug}-{counter}"
+            counter += 1
+
+        # Parse boolean available
+        avail_val = data.get('available')
+        if isinstance(avail_val, str):
+            available = avail_val.lower() in ('true', '1', 'yes')
+        else:
+            available = bool(avail_val) if avail_val is not None else True
+
+        product = Product.objects.create(
+            vendor=vendor,
+            name=name,
+            slug=slug,
+            category=category,
+            description=data.get('description', ''),
+            price=price,
+            image_url=data.get('image_url') or None,
+            room_category=data.get('room_category', ''),
+            stock=int(data.get('stock', 10)),
+            available=available,
+        )
+
+        model_file = request.FILES.get('model_file')
+        if model_file:
+            product.model_file = model_file
+            product.save()
+
+        return Response(ProductSerializer(product).data, status=status.HTTP_201_CREATED)
+    except Exception as e:
+        logger.exception("vendor_create_product failed")
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def vendor_update_product(request, product_id):
+    """Update a product — only if it belongs to this vendor."""
+    try:
+        vendor = get_object_or_404(Vendor, user=request.user)
+        product = get_object_or_404(Product, id=product_id, vendor=vendor)
+        data = request.data
+
+        allowed = ['name', 'description', 'price', 'image_url', 'room_category', 'stock']
+        for field in allowed:
+            if field in data:
+                setattr(product, field, data[field])
+
+        if 'available' in data:
+            avail_val = data['available']
+            if isinstance(avail_val, str):
+                product.available = avail_val.lower() in ('true', '1', 'yes')
+            else:
+                product.available = bool(avail_val)
+
+        if 'category' in data and data['category']:
+            cat_val = data['category']
+            category = None
+            if str(cat_val).isdigit():
+                category = Category.objects.filter(id=int(cat_val)).first()
+            if not category:
+                category = Category.objects.filter(Q(slug=cat_val) | Q(name__iexact=str(cat_val))).first()
+            if category:
+                product.category = category
+
+        model_file = request.FILES.get('model_file')
+        if model_file:
+            product.model_file = model_file
+
+        product.save()
+        return Response(ProductSerializer(product).data)
+    except Exception as e:
+        logger.exception("vendor_update_product failed")
+        return Response({'error': str(e)}, status=status.HTTP_400_BAD_REQUEST)
+
+
+@api_view(['DELETE'])
+@permission_classes([IsAuthenticated])
+def vendor_delete_product(request, product_id):
+    """Delete a product — only if it belongs to this vendor."""
+    vendor = get_object_or_404(Vendor, user=request.user)
+    product = get_object_or_404(Product, id=product_id, vendor=vendor)
+    product.delete()
+    return Response({'success': True})
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def vendor_orders(request):
+    """Return orders that contain at least one product belonging to this vendor."""
+    vendor = get_object_or_404(Vendor, user=request.user)
+    vendor_product_ids = vendor.products.values_list('id', flat=True)
+    orders = Order.objects.filter(
+        items__product__id__in=vendor_product_ids
+    ).distinct().select_related('user').prefetch_related('items__product')
+    data = []
+    for order in orders:
+        vendor_items = [item for item in order.items.all() if item.product_id in vendor_product_ids]
+        vendor_revenue = sum(item.get_cost() for item in vendor_items)
+        data.append({
+            'id': order.id,
+            'order_id': order.order_id,
+            'customer': order.user.username,
+            'status': order.status,
+            'payment_status': order.payment_status,
+            'vendor_revenue': str(vendor_revenue),
+            'total_amount': str(order.total_amount),
+            'created_at': order.created_at.isoformat(),
+            'items': [{
+                'product_name': item.product.name,
+                'quantity': item.quantity,
+                'price': str(item.price),
+            } for item in vendor_items],
+        })
+    return Response(data)
+
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def vendor_stats(request):
+    """Return summary analytics for the vendor."""
+    vendor = get_object_or_404(Vendor, user=request.user)
+    vendor_product_ids = list(vendor.products.values_list('id', flat=True))
+    orders = Order.objects.filter(items__product__id__in=vendor_product_ids).distinct()
+    total_revenue = Decimal('0')
+    for order in orders:
+        for item in order.items.filter(product__id__in=vendor_product_ids):
+            total_revenue += item.get_cost()
+    return Response({
+        'total_products': vendor.products.count(),
+        'total_orders': orders.count(),
+        'total_revenue': str(total_revenue),
+        'status': vendor.status,
+        'store_name': vendor.store_name,
+        'pending_orders': orders.filter(status='pending').count(),
+        'delivered_orders': orders.filter(status='delivered').count(),
+    })
+
+
+# ── Admin Vendor Management ───────────────────────────────────────────────────
+
+@api_view(['GET'])
+@permission_classes([IsAuthenticated])
+def admin_vendors(request):
+    """Admin: list all vendor applications."""
+    if not request.user.is_staff:
+        return Response({'error': 'Admin access required.'}, status=status.HTTP_403_FORBIDDEN)
+    vendors = Vendor.objects.select_related('user').all()
+    return Response(VendorSerializer(vendors, many=True).data)
+
+
+@api_view(['PUT'])
+@permission_classes([IsAuthenticated])
+def admin_approve_vendor(request, vendor_id):
+    """Admin: approve or reject a vendor application."""
+    if not request.user.is_staff:
+        return Response({'error': 'Admin access required.'}, status=status.HTTP_403_FORBIDDEN)
+    vendor = get_object_or_404(Vendor, id=vendor_id)
+    new_status = request.data.get('status')
+    if new_status not in ['approved', 'rejected', 'pending']:
+        return Response({'error': 'status must be approved, rejected, or pending.'}, status=status.HTTP_400_BAD_REQUEST)
+    vendor.status = new_status
+    vendor.save()
+    return Response(VendorSerializer(vendor).data)

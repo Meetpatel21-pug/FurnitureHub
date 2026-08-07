@@ -68,6 +68,19 @@ urlpatterns = [
     path('admin/users/<int:user_id>/delete/', views.admin_delete_user, name='admin-delete-user'),
     path('admin/wishlists/<int:wishlist_id>/delete/', views.admin_remove_wishlist, name='admin-remove-wishlist'),
     path('orders/<str:order_id>/invoice/', views.download_invoice, name='download-invoice'),
+
+    # Vendor / Multi-Seller
+    path('vendor/register/', views.vendor_register, name='vendor-register'),
+    path('vendor/profile/', views.vendor_profile, name='vendor-profile'),
+    path('vendor/products/', views.vendor_products, name='vendor-products'),
+    path('vendor/products/create/', views.vendor_create_product, name='vendor-create-product'),
+    path('vendor/products/<int:product_id>/update/', views.vendor_update_product, name='vendor-update-product'),
+    path('vendor/products/<int:product_id>/delete/', views.vendor_delete_product, name='vendor-delete-product'),
+    path('vendor/orders/', views.vendor_orders, name='vendor-orders'),
+    path('vendor/stats/', views.vendor_stats, name='vendor-stats'),
+    path('admin/vendors/', views.admin_vendors, name='admin-vendors'),
+    path('admin/vendors/<int:vendor_id>/approve/', views.admin_approve_vendor, name='admin-approve-vendor'),
 ]
+
 
 

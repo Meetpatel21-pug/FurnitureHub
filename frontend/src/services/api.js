@@ -133,6 +133,28 @@ export const adminAPI = {
   
   // Wishlists
   getWishlists: () => api.get('/admin/wishlists/'),
+
+  // Vendors
+  getVendors: () => api.get('/admin/vendors/'),
+  approveVendor: (id, status) => api.put(`/admin/vendors/${id}/approve/`, { status }),
+};
+
+export const vendorAPI = {
+  // Registration & Profile
+  register: (data) => api.post('/vendor/register/', data),
+  getProfile: () => api.get('/vendor/profile/'),
+  updateProfile: (data) => api.put('/vendor/profile/', data),
+
+  // Products
+  getProducts: () => api.get('/vendor/products/'),
+  createProduct: (data) => api.post('/vendor/products/create/', data),
+  updateProduct: (id, data) => api.put(`/vendor/products/${id}/update/`, data),
+  deleteProduct: (id) => api.delete(`/vendor/products/${id}/delete/`),
+
+  // Orders & Stats
+  getOrders: () => api.get('/vendor/orders/'),
+  getStats: () => api.get('/vendor/stats/'),
 };
 
 export default api;
+
