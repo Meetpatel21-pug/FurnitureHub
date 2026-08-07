@@ -39,7 +39,7 @@ const collections = [
   },
   {
     title: 'Dining Table',
-    image: 'https://images.unsplash.com/photo-1615876234886-fdba0f5c8155?w=800&q=80',
+    image: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800&q=80',
     link: '/products?category=dining-table',
   },
 ];
