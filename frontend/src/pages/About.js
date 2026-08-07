@@ -29,10 +29,10 @@ const About = () => {
       </div>
 
       {/* Our Story */}
-      <section className="py-5 bg-light">
+      <section className="py-5" style={{ background: 'var(--bg-base)' }}>
         <div className="container">
           <div className="text-center mb-5 animate__animated animate__fadeInUp">
-            <h2 className="fw-bold text-dark">Our Story</h2>
+            <h2 className="fw-bold" style={{ color: 'var(--ink)' }}>Our Story</h2>
             <p className="text-muted">15 years of transforming homes</p>
           </div>
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: 24 }}>

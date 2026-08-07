@@ -6,32 +6,32 @@
 
 @import url('https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,500;0,600;0,700;1,400;1,500&family=Inter:wght@300;400;500;600;700&display=swap');
 
-/* ── Design Tokens — Eastern Edition ─────────────────────── */
+/* ── Design Tokens — Eastern Edition (Black Theme) ─────────────────────── */
 :root {
   /* Palette */
-  --bg-base:     #f5f5f5;
-  --bg-white:    #ffffff;
-  --bg-surface:  #eeeeee;
-  --bg-muted:    #e8e8e8;
-  --ink:         #111111;
-  --ink-muted:   #555555;
-  --ink-light:   #999999;
-  --border:      rgba(0,0,0,0.10);
-  --border-soft: rgba(0,0,0,0.05);
+  --bg-base:     #000000;
+  --bg-white:    #0a0a0a;
+  --bg-surface:  #141414;
+  --bg-muted:    #1c1c1c;
+  --ink:         #ffffff;
+  --ink-muted:   #aaaaaa;
+  --ink-light:   #777777;
+  --border:      rgba(255,255,255,0.12);
+  --border-soft: rgba(255,255,255,0.06);
 
-  /* Single accent: black */
-  --accent:         #111111;
-  --accent-light:   #333333;
-  --accent-dark:    #000000;
-  --accent-bg:      rgba(0,0,0,0.05);
-  --accent-warm:    #111111;
-  --accent-warm-bg: rgba(0,0,0,0.05);
+  /* Single accent: white */
+  --accent:         #ffffff;
+  --accent-light:   #e0e0e0;
+  --accent-dark:    #ffffff;
+  --accent-bg:      rgba(255,255,255,0.10);
+  --accent-warm:    #ffffff;
+  --accent-warm-bg: rgba(255,255,255,0.10);
 
   /* Gradients — monochrome */
-  --grad-accent: linear-gradient(135deg,#111 0%,#333 100%);
-  --grad-warm:   linear-gradient(135deg,#333 0%,#555 100%);
-  --grad-hero:   linear-gradient(180deg,rgba(0,0,0,0.50) 0%,rgba(0,0,0,0.10) 100%);
-  --grad-dark:   linear-gradient(145deg,#111 0%,#1a1a1a 100%);
+  --grad-accent: linear-gradient(135deg,#fff 0%,#ccc 100%);
+  --grad-warm:   linear-gradient(135deg,#ccc 0%,#aaa 100%);
+  --grad-hero:   linear-gradient(180deg,rgba(0,0,0,0.70) 0%,rgba(0,0,0,0.30) 100%);
+  --grad-dark:   linear-gradient(145deg,#000 0%,#181818 100%);
   --grad-card:   none;
 
   /* Border Radius — FLAT (Eastern Edition is sharp) */
@@ -63,39 +63,28 @@
 /* ── Global Reset & Base ─────────────────────────────────── */
 *,*::before,*::after { box-sizing:border-box; margin:0; padding:0; }
 
-html { scroll-behavior:smooth; }
+html { scroll-behavior:smooth; background-color: #000000; }
 
-body {
+body,
+body[data-theme='light'],
+body[data-theme='dark'] {
   font-family: var(--font-sans);
-  background-color: var(--bg-base);
-  color: var(--ink);
+  background-color: #000000 !important;
+  color: #ffffff;
   line-height: 1.6;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   overflow-x: hidden;
-}
 
-/* Dark mode — muted dark */
-body[data-theme='dark'] {
-  --bg-base:    #0e0e0e;
-  --bg-white:   #161616;
-  --bg-surface: #1a1a1a;
-  --bg-muted:   #222222;
-  --ink:         #f5f5f5;
-  --ink-muted:   rgba(245,245,245,0.65);
-  --ink-light:   rgba(245,245,245,0.40);
-  --border:      rgba(255,255,255,0.08);
-  --border-soft: rgba(255,255,255,0.04);
-}
-
-body[data-theme='light'] {
-  --bg-base:    #f5f5f5;
-  --bg-white:   #ffffff;
-  --bg-surface: #eeeeee;
-  --bg-muted:   #e8e8e8;
-  --ink:        #111111;
-  --ink-muted:  #555555;
-  --ink-light:  #999999;
+  --bg-base:    #000000;
+  --bg-white:   #0a0a0a;
+  --bg-surface: #141414;
+  --bg-muted:   #1c1c1c;
+  --ink:        #ffffff;
+  --ink-muted:  #aaaaaa;
+  --ink-light:  #777777;
+  --border:      rgba(255,255,255,0.12);
+  --border-soft: rgba(255,255,255,0.06);
 }
 
 .App {
@@ -253,12 +242,58 @@ body[data-theme='dark'] .glass-card {
   transition: background var(--dur-slow) var(--ease), backdrop-filter var(--dur-slow) var(--ease);
 }
 .navbar-scrolled {
-  background: rgba(255, 255, 255, 0.85);
+  background: rgba(255, 255, 255, 0.95) !important;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.12) !important;
   padding: 0;
 }
+
+/* Ensure ALL navbar options, text, and icons are solid black after scrolling */
+.navbar-scrolled .logo-text,
+.navbar-scrolled .header-nav-link,
+.navbar-scrolled .search-input,
+.navbar-scrolled .search-btn,
+.navbar-scrolled .cart-link,
+.navbar-scrolled .wishlist-link,
+.navbar-scrolled .menu-icon,
+.navbar-scrolled .user-button,
+.navbar-scrolled .theme-toggle-btn,
+body[data-theme='dark'] .navbar-scrolled .logo-text,
+body[data-theme='dark'] .navbar-scrolled .header-nav-link,
+body[data-theme='dark'] .navbar-scrolled .search-input,
+body[data-theme='dark'] .navbar-scrolled .search-btn,
+body[data-theme='dark'] .navbar-scrolled .cart-link,
+body[data-theme='dark'] .navbar-scrolled .wishlist-link,
+body[data-theme='dark'] .navbar-scrolled .menu-icon,
+body[data-theme='dark'] .navbar-scrolled .user-button,
+body[data-theme='dark'] .navbar-scrolled .theme-toggle-btn {
+  color: #000000 !important;
+}
+
+.navbar-scrolled .search-input::placeholder,
+body[data-theme='dark'] .navbar-scrolled .search-input::placeholder {
+  color: rgba(0, 0, 0, 0.6) !important;
+}
+
+.navbar-scrolled .search-form,
+body[data-theme='dark'] .navbar-scrolled .search-form {
+  border-bottom-color: rgba(0, 0, 0, 0.3) !important;
+}
+
+.navbar-scrolled .header-nav-link:hover,
+.navbar-scrolled .header-nav-link.active,
+body[data-theme='dark'] .navbar-scrolled .header-nav-link:hover,
+body[data-theme='dark'] .navbar-scrolled .header-nav-link.active {
+  color: #000000 !important;
+  border-bottom-color: #000000 !important;
+}
+
+.navbar-scrolled .user-button,
+body[data-theme='dark'] .navbar-scrolled .user-button {
+  border-color: rgba(0, 0, 0, 0.3) !important;
+}
+
 
 /* Header Main Navigation Links (inline on navbar) */
 .header-main-links {
@@ -1172,33 +1207,18 @@ body[data-theme='dark'] .product-category-badge {
 }
 
 body[data-theme='dark'] .wishlist-btn {
-  background: rgba(15, 23, 42, 0.75);
-  border-color: rgba(255, 255, 255, 0.15);
-  color: #D1D5DB;
-  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.4);
+  background: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4) !important;
 }
 
 .wishlist-btn:hover,
-.wishlist-btn.active {
-  background: #fff0f0;
-  color: #e53e3e;
-  border-color: #fed7d7;
-  transform: scale(1.1);
-}
-
+.wishlist-btn.active,
 body[data-theme='dark'] .wishlist-btn:hover,
 body[data-theme='dark'] .wishlist-btn.active {
-  background: rgba(220, 38, 38, 0.20);
-  color: #FCA5A5;
-  border-color: rgba(220, 38, 38, 0.35);
-}
-
-.wishlist-btn.active {
-  color: #e53e3e;
-}
-
-body[data-theme='dark'] .wishlist-btn.active {
-  color: #FCA5A5;
+  background: #ffffff !important;
+  color: #e53e3e !important;
+  transform: scale(1.1);
 }
 
 /* Stock Badge */
@@ -2845,3 +2865,15 @@ body[data-theme='dark'] .chatbot-powered {
   border-top-color: #fff;
   animation: spin 0.8s linear infinite;
 }
+
+/* ── Shop Our Collections Grid ── */
+.collection-card-item {
+  display: block;
+}
+.collection-card-item:hover .collection-card-img {
+  transform: scale(1.06);
+}
+.collection-card-item:hover > div {
+  background-color: #222222 !important;
+}
+

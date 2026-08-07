@@ -78,117 +78,316 @@ const ForgotPassword = () => {
 
   return (
     <div
-      className="min-vh-100 d-flex align-items-center"
+      className="min-vh-100 d-flex align-items-center justify-content-center"
       style={{
-        background: isDarkTheme
-          ? 'linear-gradient(180deg, #0f172a 0%, #111827 100%)'
-          : 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)',
-        paddingTop: '80px',
+        background: '#000000',
+        paddingTop: '100px',
+        paddingBottom: '60px',
       }}
     >
-      <div className="container py-5">
+      <div className="container">
         <div className="row justify-content-center">
-          <div className="col-md-6 col-lg-4">
-            <div className="card border-0" style={cardStyle}>
-              <div className="card-body p-5">
-                <div className="text-center mb-4">
-                  <i className="fas fa-lock mb-3" style={{ fontSize: '3rem', background: 'linear-gradient(45deg, #667eea, #764ba2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}></i>
-                  <h2 className={`mb-2 ${isDarkTheme ? 'text-white' : 'text-dark'}`}>
-                    {step === 1 ? 'Forgot Password' : step === 2 ? 'Verify OTP' : 'Reset Password'}
-                  </h2>
-                  <p className={isDarkTheme ? 'text-muted' : 'text-secondary'}>
-                    {step === 1 && 'Enter your email to receive an OTP'}
-                    {step === 2 && `OTP sent to ${email}`}
-                    {step === 3 && 'Enter your new password'}
-                  </p>
-                </div>
+          <div className="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
+            <div
+              style={{
+                background: '#121212',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '16px',
+                padding: '44px 36px',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.9)',
+              }}
+            >
+              <div className="text-center mb-4">
+                <span
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255, 255, 255, 0.45)',
+                    display: 'block',
+                    marginBottom: '10px',
+                  }}
+                >
+                  FurnitureHub
+                </span>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '2rem',
+                    fontWeight: 400,
+                    color: '#ffffff',
+                    marginBottom: '8px',
+                  }}
+                >
+                  {step === 1 ? 'Reset Password' : step === 2 ? 'Verify OTP' : 'New Password'}
+                </h2>
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    margin: 0,
+                  }}
+                >
+                  {step === 1 && 'Enter your email to receive a security code'}
+                  {step === 2 && `Enter the 6-digit code sent to ${email}`}
+                  {step === 3 && 'Choose a strong new password'}
+                </p>
+              </div>
 
-                {/* Step 1: Email */}
-                {step === 1 && (
-                  <form onSubmit={handleSendOtp}>
-                    <div className="mb-4">
-                      <label className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Email Address</label>
-                      <input
-                        type="email"
-                        className="form-control"
-                        style={inputStyle}
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        placeholder="Enter your registered email"
-                        required
-                      />
-                    </div>
-                    <button type="submit" className="btn w-100 fw-bold" style={btnStyle} disabled={loading}>
-                      {loading ? <><span className="spinner-border spinner-border-sm me-2"></span>Sending...</> : <><i className="fas fa-paper-plane me-2"></i>Send OTP</>}
-                    </button>
-                  </form>
-                )}
+              {/* Step 1: Email */}
+              {step === 1 && (
+                <form onSubmit={handleSendOtp}>
+                  <div className="mb-4">
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'rgba(255, 255, 255, 0.85)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      Email Address
+                    </label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      style={{
+                        background: '#1a1a1a',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        padding: '12px 16px',
+                        fontSize: '14px',
+                        boxShadow: 'none',
+                      }}
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter registered email"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      background: '#ffffff',
+                      color: '#000000',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      padding: '14px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" />
+                        Sending Code...
+                      </>
+                    ) : (
+                      'Send Security Code'
+                    )}
+                  </button>
+                </form>
+              )}
 
-                {/* Step 2: OTP */}
-                {step === 2 && (
-                  <form onSubmit={handleVerifyOtp}>
-                    <div className="mb-4">
-                      <label className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Enter OTP</label>
-                      <input
-                        type="text"
-                        className="form-control text-center"
-                        style={{ ...inputStyle, fontSize: '1.5rem', letterSpacing: '0.5rem' }}
-                        value={otp}
-                        onChange={(e) => setOtp(e.target.value)}
-                        placeholder="------"
-                        maxLength={6}
-                        required
-                      />
-                      <div className="text-end mt-2">
-                        <button type="button" className="btn btn-link btn-sm p-0" style={{ color: '#667eea' }} onClick={handleSendOtp}>
-                          Resend OTP
-                        </button>
-                      </div>
+              {/* Step 2: OTP */}
+              {step === 2 && (
+                <form onSubmit={handleVerifyOtp}>
+                  <div className="mb-4">
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'rgba(255, 255, 255, 0.85)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      Security OTP
+                    </label>
+                    <input
+                      type="text"
+                      className="form-control text-center"
+                      style={{
+                        background: '#1a1a1a',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        padding: '12px 16px',
+                        fontSize: '1.5rem',
+                        letterSpacing: '0.4rem',
+                        boxShadow: 'none',
+                      }}
+                      value={otp}
+                      onChange={(e) => setOtp(e.target.value)}
+                      placeholder="------"
+                      maxLength={6}
+                      required
+                    />
+                    <div className="text-end mt-2">
+                      <button
+                        type="button"
+                        className="btn btn-link btn-sm p-0"
+                        style={{ color: 'rgba(255, 255, 255, 0.65)', fontSize: '12px' }}
+                        onClick={handleSendOtp}
+                      >
+                        Resend Code
+                      </button>
                     </div>
-                    <button type="submit" className="btn w-100 fw-bold" style={btnStyle} disabled={loading}>
-                      {loading ? <><span className="spinner-border spinner-border-sm me-2"></span>Verifying...</> : <><i className="fas fa-check me-2"></i>Verify OTP</>}
-                    </button>
-                  </form>
-                )}
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      background: '#ffffff',
+                      color: '#000000',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      padding: '14px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" />
+                        Verifying...
+                      </>
+                    ) : (
+                      'Verify Code'
+                    )}
+                  </button>
+                </form>
+              )}
 
-                {/* Step 3: New Password */}
-                {step === 3 && (
-                  <form onSubmit={handleResetPassword}>
-                    <div className="mb-3">
-                      <label className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>New Password</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        style={inputStyle}
-                        value={passwords.newPassword}
-                        onChange={(e) => setPasswords({ ...passwords, newPassword: e.target.value })}
-                        placeholder="Enter new password"
-                        required
-                      />
-                    </div>
-                    <div className="mb-4">
-                      <label className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Confirm Password</label>
-                      <input
-                        type="password"
-                        className="form-control"
-                        style={inputStyle}
-                        value={passwords.confirmPassword}
-                        onChange={(e) => setPasswords({ ...passwords, confirmPassword: e.target.value })}
-                        placeholder="Confirm new password"
-                        required
-                      />
-                    </div>
-                    <button type="submit" className="btn w-100 fw-bold" style={btnStyle} disabled={loading}>
-                      {loading ? <><span className="spinner-border spinner-border-sm me-2"></span>Resetting...</> : <><i className="fas fa-key me-2"></i>Reset Password</>}
-                    </button>
-                  </form>
-                )}
+              {/* Step 3: New Password */}
+              {step === 3 && (
+                <form onSubmit={handleResetPassword}>
+                  <div className="mb-3">
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'rgba(255, 255, 255, 0.85)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      New Password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      style={{
+                        background: '#1a1a1a',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        padding: '12px 16px',
+                        fontSize: '14px',
+                        boxShadow: 'none',
+                      }}
+                      value={passwords.newPassword}
+                      onChange={(e) =>
+                        setPasswords({ ...passwords, newPassword: e.target.value })
+                      }
+                      placeholder="Enter new password"
+                      required
+                    />
+                  </div>
+                  <div className="mb-4">
+                    <label
+                      style={{
+                        display: 'block',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'rgba(255, 255, 255, 0.85)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      Confirm Password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control"
+                      style={{
+                        background: '#1a1a1a',
+                        border: '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        padding: '12px 16px',
+                        fontSize: '14px',
+                        boxShadow: 'none',
+                      }}
+                      value={passwords.confirmPassword}
+                      onChange={(e) =>
+                        setPasswords({ ...passwords, confirmPassword: e.target.value })
+                      }
+                      placeholder="Confirm new password"
+                      required
+                    />
+                  </div>
+                  <button
+                    type="submit"
+                    disabled={loading}
+                    style={{
+                      width: '100%',
+                      background: '#ffffff',
+                      color: '#000000',
+                      fontWeight: 700,
+                      fontSize: '12px',
+                      letterSpacing: '0.12em',
+                      textTransform: 'uppercase',
+                      padding: '14px',
+                      borderRadius: '8px',
+                      border: 'none',
+                      cursor: loading ? 'not-allowed' : 'pointer',
+                    }}
+                  >
+                    {loading ? (
+                      <>
+                        <span className="spinner-border spinner-border-sm me-2" role="status" />
+                        Resetting...
+                      </>
+                    ) : (
+                      'Update Password'
+                    )}
+                  </button>
+                </form>
+              )}
 
-                <div className="text-center mt-4">
-                  <Link to="/login" style={{ color: '#667eea', textDecoration: 'none', fontWeight: '500' }}>
-                    <i className="fas fa-arrow-left me-1"></i>Back to Login
-                  </Link>
-                </div>
+              <div className="text-center mt-4 pt-2">
+                <Link
+                  to="/login"
+                  style={{
+                    color: 'rgba(255, 255, 255, 0.65)',
+                    fontSize: '13px',
+                    textDecoration: 'none',
+                  }}
+                >
+                  <i className="fas fa-arrow-left me-2" />
+                  Back to Sign In
+                </Link>
               </div>
             </div>
           </div>

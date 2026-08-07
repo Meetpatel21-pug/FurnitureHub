@@ -239,35 +239,47 @@ def _score_product(product, room_type, room_style, detections, budget, knn_score
 
     knn_score = min(float(knn_scores.get(product.id, 5.0)) / 10.0, 1.0)
 
+    has_budget = False
+    budget_score = 0.5
     if budget:
-        price = float(product.price)
-        budget_value = float(budget)
-        if budget_value > 0 and price <= budget_value:
-            budget_score = 1.0 - (price / budget_value) * 0.35
-        elif budget_value > 0:
-            budget_score = max(0.15, 1.0 - ((price - budget_value) / budget_value))
-        else:
-            budget_score = 0.5
-    else:
-        budget_score = 0.5
+        try:
+            price = float(product.price)
+            budget_val = float(budget)
+            if budget_val > 0:
+                has_budget = True
+                if price <= budget_val:
+                    budget_score = 1.0 - (price / budget_val) * 0.15
+                else:
+                    over_ratio = (price - budget_val) / budget_val
+                    budget_score = max(0.0, 0.1 - over_ratio * 0.5)
+        except (ValueError, TypeError):
+            pass
 
-    final_score = (
-        category_score * 0.35 +
-        complement_score * 0.25 +
-        style_score * 0.2 +
-        knn_score * 0.15 +
-        budget_score * 0.05
-    )
+    if has_budget:
+        final_score = (
+            budget_score * 0.40 +
+            category_score * 0.25 +
+            complement_score * 0.20 +
+            style_score * 0.10 +
+            knn_score * 0.05
+        )
+    else:
+        final_score = (
+            category_score * 0.35 +
+            complement_score * 0.25 +
+            style_score * 0.25 +
+            knn_score * 0.15
+        )
 
     reasons = []
+    if has_budget and float(product.price) <= float(budget):
+        reasons.append(f'within budget (₹{int(float(product.price))})')
     if category_score >= 1.0:
         reasons.append(f"fits the {room_type.replace('_', ' ')} setup")
     if complement_score >= 0.8:
         reasons.append('complements existing furniture')
     if style_score >= 0.75:
         reasons.append(f'matches the {room_style} style')
-    if budget and float(product.price) <= float(budget):
-        reasons.append('stays within budget')
 
     return final_score, '; '.join(reasons[:2]) or 'best overall match'
 
@@ -314,6 +326,18 @@ def analyze_room_image(uploaded_image, user=None, budget=None, style=None, room_
     knn_scores = _collect_knn_scores()
 
     products = Product.objects.filter(available=True).select_related('category')
+    
+    # Strictly filter products within budget when budget is specified
+    if budget:
+        try:
+            budget_val = float(budget)
+            if budget_val > 0:
+                within_budget = [p for p in products if float(p.price) <= budget_val]
+                if within_budget:
+                    products = within_budget
+        except (ValueError, TypeError):
+            pass
+
     scored_products = []
     for product in products:
         score, reason = _score_product(product, room_type, room_style, detections, budget, knn_scores)

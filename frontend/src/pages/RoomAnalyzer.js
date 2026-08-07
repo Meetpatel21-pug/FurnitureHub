@@ -1,26 +1,46 @@
-import React, { useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { roomAIAPI } from '../services/api';
+import { roomAIAPI, mlAPI, productsAPI } from '../services/api';
 
 const backendBaseUrl = 'http://127.0.0.1:8000';
 
 const fallbackRecommendations = [
   {
     id: 1,
-    name: 'Sierra Accent Chair',
-    price: 12999,
-    image_url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&h=420&fit=crop',
+    name: 'Modern Sectional Sofa',
+    price: 1299.99,
+    image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=420&fit=crop',
     category: 'Living Room',
-    slug: 'sierra-accent-chair',
+    slug: 'modern-sectional-sofa',
+    reason: 'Comfortable and stylish sectional sofa perfect for modern living rooms.',
   },
   {
     id: 2,
-    name: 'Haven Coffee Table',
-    price: 8999,
-    image_url: 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=600&h=420&fit=crop',
-    category: 'Living Room',
-    slug: 'haven-coffee-table',
+    name: 'Queen Size Bed Frame',
+    price: 599.99,
+    image_url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&h=420&fit=crop',
+    category: 'Bedroom',
+    slug: 'queen-size-bed-frame',
+    reason: 'Elegant queen size bed frame with headboard for bedrooms.',
+  },
+  {
+    id: 3,
+    name: 'Dining Table Set',
+    price: 899.99,
+    image_url: 'https://images.unsplash.com/photo-1549497538-303791108f95?w=600&h=420&fit=crop',
+    category: 'Dining Room',
+    slug: 'dining-table-set',
+    reason: 'Beautiful wooden dining table set for 6 people.',
+  },
+  {
+    id: 4,
+    name: 'Ergonomic Office Chair',
+    price: 299.99,
+    image_url: 'https://images.unsplash.com/photo-1541558869434-2840d308329a?w=600&h=420&fit=crop',
+    category: 'Office',
+    slug: 'ergonomic-office-chair',
+    reason: 'High-quality ergonomic office chair with lumbar support.',
   },
 ];
 
@@ -38,6 +58,28 @@ const RoomAnalyzer = () => {
   const [budget, setBudget] = useState('');
   const [analyzing, setAnalyzing] = useState(false);
   const [analysis, setAnalysis] = useState(null);
+  const [dbRecommendations, setDbRecommendations] = useState([]);
+
+  useEffect(() => {
+    const fetchDbProducts = async () => {
+      try {
+        const res = await mlAPI.getRecommendations('knn', 6);
+        const items = res.data?.recommendations || [];
+        if (Array.isArray(items) && items.length > 0) {
+          setDbRecommendations(items);
+        } else {
+          const prodRes = await productsAPI.getAll();
+          const prods = prodRes.data?.results || prodRes.data || [];
+          if (Array.isArray(prods) && prods.length > 0) {
+            setDbRecommendations(prods);
+          }
+        }
+      } catch (err) {
+        console.error('Failed to fetch database products for suggestions:', err);
+      }
+    };
+    fetchDbProducts();
+  }, []);
 
   const previewUrl = useMemo(() => {
     return resolveMediaUrl(analysis?.preview?.annotated_image_url) || imagePreview;
@@ -83,7 +125,23 @@ const RoomAnalyzer = () => {
   };
 
   const detections = analysis?.detected_objects || [];
-  const recommendations = analysis?.recommendations?.length ? analysis.recommendations : fallbackRecommendations;
+  const baseRecommendations = analysis?.recommendations?.length
+    ? analysis.recommendations
+    : dbRecommendations.length
+    ? dbRecommendations
+    : fallbackRecommendations;
+
+  const recommendations = useMemo(() => {
+    if (!budget || isNaN(Number(budget)) || Number(budget) <= 0) {
+      return baseRecommendations;
+    }
+    const budgetVal = Number(budget);
+    const withinBudget = baseRecommendations.filter((item) => Number(item.price || 0) <= budgetVal);
+    if (withinBudget.length > 0) {
+      return withinBudget.sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+    }
+    return [...baseRecommendations].sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+  }, [baseRecommendations, budget]);
 
   return (
     <div className="room-ai-page">

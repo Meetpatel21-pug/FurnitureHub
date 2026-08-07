@@ -69,91 +69,202 @@ const Login = () => {
 
   return (
     <div
-      className="min-vh-100 d-flex align-items-center"
+      className="min-vh-100 d-flex align-items-center justify-content-center"
       style={{
-        background: isDarkTheme
-          ? 'linear-gradient(180deg, #0f172a 0%, #111827 100%)'
-          : 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)',
-        paddingTop: '80px',
+        background: '#000000',
+        paddingTop: '100px',
+        paddingBottom: '60px',
       }}
     >
-      <div className="container py-5">
+      <div className="container">
         <div className="row justify-content-center">
-          <div className="col-md-6 col-lg-4">
+          <div className="col-12 col-sm-10 col-md-7 col-lg-5 col-xl-4">
             <div
-              className="card border-0"
               style={{
-                background: isDarkTheme ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.96)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '20px',
-                boxShadow: isDarkTheme ? '0 8px 32px rgba(0,0,0,0.3)' : '0 12px 32px rgba(15,23,42,0.12)',
-                border: `1px solid ${isDarkTheme ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`,
+                background: '#121212',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '16px',
+                padding: '44px 36px',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.9)',
               }}
             >
-              <div className="card-body p-5">
-                <div className="text-center mb-4">
-                  <i className="fas fa-couch mb-3" style={{fontSize: '3rem', background: 'linear-gradient(45deg, #667eea, #764ba2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}></i>
-                  <h2 className={`mb-2 ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Welcome Back</h2>
-                  <p className={isDarkTheme ? 'text-muted' : 'text-secondary'}>Sign in to your FurnitureHub account</p>
-                </div>
-                <form onSubmit={handleSubmit}>
-                  <div className="mb-3">
-                    <label htmlFor="username" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Username</label>
-                    <input
-                      type="text"
-                      className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.username ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
-                      id="username"
-                      name="username"
-                      value={formData.username}
-                      onChange={handleChange}
-                      placeholder="Enter your username"
-                      required
-                    />
-                    {errors.username && <div className="text-danger small mt-1">{errors.username}</div>}
-                  </div>
-                  <div className="mb-4">
-                    <label htmlFor="password" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Password</label>
-                    <input
-                      type="password"
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.password ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Enter your password"
-                      required
-                    />
-                    {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
-                  </div>
-                  <button
-                    type="submit"
-                    className="btn w-100 fw-bold"
-                    style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', borderRadius: '10px', padding: '12px'}}
-                    disabled={loading}
+              <div className="text-center mb-4">
+                <span
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255, 255, 255, 0.45)',
+                    display: 'block',
+                    marginBottom: '10px',
+                  }}
+                >
+                  FurnitureHub
+                </span>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '2rem',
+                    fontWeight: 400,
+                    color: '#ffffff',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Welcome Back
+                </h2>
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    margin: 0,
+                  }}
+                >
+                  Sign in to access your saved rooms and cart
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                <div className="mb-3">
+                  <label
+                    htmlFor="username"
+                    style={{
+                      display: 'block',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(255, 255, 255, 0.85)',
+                      marginBottom: '8px',
+                    }}
                   >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                        Signing in...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-sign-in-alt me-2"></i>
-                        Sign In
-                      </>
-                    )}
-                  </button>
-                </form>
-                <div className="text-center mt-3">
-                  <Link to="/forgot-password" style={{color: '#667eea', textDecoration: 'none', fontWeight: '500'}}>
-                    <i className="fas fa-key me-1"></i>Forgot Password?
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                    style={{
+                      background: '#1a1a1a',
+                      border: errors.username
+                        ? '1px solid #dc3545'
+                        : '1px solid rgba(255, 255, 255, 0.15)',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      boxShadow: 'none',
+                    }}
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="Enter your username"
+                    required
+                  />
+                  {errors.username && (
+                    <div className="text-danger small mt-1">{errors.username}</div>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <div className="d-flex justify-content-between align-items-center mb-2">
+                    <label
+                      htmlFor="password"
+                      style={{
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'rgba(255, 255, 255, 0.85)',
+                        margin: 0,
+                      }}
+                    >
+                      Password
+                    </label>
+                    <Link
+                      to="/forgot-password"
+                      style={{
+                        color: 'rgba(255, 255, 255, 0.55)',
+                        fontSize: '12px',
+                        textDecoration: 'none',
+                      }}
+                    >
+                      Forgot Password?
+                    </Link>
+                  </div>
+                  <input
+                    type="password"
+                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                    style={{
+                      background: '#1a1a1a',
+                      border: errors.password
+                        ? '1px solid #dc3545'
+                        : '1px solid rgba(255, 255, 255, 0.15)',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      boxShadow: 'none',
+                    }}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Enter your password"
+                    required
+                  />
+                  {errors.password && (
+                    <div className="text-danger small mt-1">{errors.password}</div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    background: '#ffffff',
+                    color: '#000000',
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    padding: '14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    transition: 'background 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#e2e2e2')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#ffffff')}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" />
+                      Signing in...
+                    </>
+                  ) : (
+                    'Sign In'
+                  )}
+                </button>
+              </form>
+
+              <div className="text-center mt-4 pt-2">
+                <p style={{ color: 'rgba(255, 255, 255, 0.55)', fontSize: '13px', margin: 0 }}>
+                  Don't have an account?{' '}
+                  <Link
+                    to="/register"
+                    style={{
+                      color: '#ffffff',
+                      fontWeight: 600,
+                      textDecoration: 'underline',
+                      marginLeft: '4px',
+                    }}
+                  >
+                    Create Account
                   </Link>
-                </div>
-                <div className="text-center mt-3">
-                  <p className={`${isDarkTheme ? 'text-muted' : 'text-secondary'} mb-0`}>Don't have an account? <Link to="/register" style={{color: '#667eea', textDecoration: 'none', fontWeight: '500'}}>Create Account</Link></p>
-                </div>
+                </p>
               </div>
             </div>
           </div>

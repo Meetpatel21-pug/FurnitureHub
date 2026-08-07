@@ -92,148 +92,357 @@ const Register = () => {
 
   return (
     <div
-      className="min-vh-100 d-flex align-items-center"
+      className="min-vh-100 d-flex align-items-center justify-content-center"
       style={{
-        background: isDarkTheme
-          ? 'linear-gradient(180deg, #0f172a 0%, #111827 100%)'
-          : 'linear-gradient(180deg, #f8fafc 0%, #eef2ff 100%)',
-        paddingTop: '80px',
+        background: '#000000',
+        paddingTop: '100px',
+        paddingBottom: '60px',
       }}
     >
-      <div className="container py-5">
+      <div className="container">
         <div className="row justify-content-center">
-          <div className="col-md-8 col-lg-6">
+          <div className="col-12 col-sm-10 col-md-8 col-lg-6 col-xl-5">
             <div
-              className="card border-0"
               style={{
-                background: isDarkTheme ? 'rgba(255,255,255,0.05)' : 'rgba(255,255,255,0.96)',
-                backdropFilter: 'blur(20px)',
-                borderRadius: '20px',
-                boxShadow: isDarkTheme ? '0 8px 32px rgba(0,0,0,0.3)' : '0 12px 32px rgba(15,23,42,0.12)',
-                border: `1px solid ${isDarkTheme ? 'rgba(255,255,255,0.08)' : 'rgba(15,23,42,0.08)'}`,
+                background: '#121212',
+                border: '1px solid rgba(255, 255, 255, 0.12)',
+                borderRadius: '16px',
+                padding: '44px 36px',
+                boxShadow: '0 24px 60px rgba(0, 0, 0, 0.9)',
               }}
             >
-              <div className="card-body p-5">
-                <div className="text-center mb-4">
-                  <i className="fas fa-couch mb-3" style={{fontSize: '3rem', background: 'linear-gradient(45deg, #667eea, #764ba2)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent'}}></i>
-                  <h2 className={`mb-2 ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Join FurnitureHub</h2>
-                  <p className={isDarkTheme ? 'text-muted' : 'text-secondary'}>Create your account to get started</p>
-                </div>
-                <form onSubmit={handleSubmit}>
-                  <div className="row">
-                    <div className="col-md-6 mb-3">
-                      <label htmlFor="first_name" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>First Name</label>
-                      <input
-                        type="text"
-                        className={`form-control ${errors.first_name ? 'is-invalid' : ''}`}
-                        style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.first_name ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
-                        id="first_name"
-                        name="first_name"
-                        value={formData.first_name}
-                        onChange={handleChange}
-                        placeholder="Enter first name"
-                        required
-                      />
-                      {errors.first_name && <div className="text-danger small mt-1">{errors.first_name}</div>}
-                    </div>
-                    <div className="col-md-6 mb-3">
-                      <label htmlFor="last_name" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Last Name</label>
-                      <input
-                        type="text"
-                        className={`form-control ${errors.last_name ? 'is-invalid' : ''}`}
-                        style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.last_name ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
-                        id="last_name"
-                        name="last_name"
-                        value={formData.last_name}
-                        onChange={handleChange}
-                        placeholder="Enter last name"
-                        required
-                      />
-                      {errors.last_name && <div className="text-danger small mt-1">{errors.last_name}</div>}
-                    </div>
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="username" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Username</label>
+              <div className="text-center mb-4">
+                <span
+                  style={{
+                    fontFamily: 'var(--font-sans)',
+                    fontSize: '11px',
+                    fontWeight: 700,
+                    letterSpacing: '0.22em',
+                    textTransform: 'uppercase',
+                    color: 'rgba(255, 255, 255, 0.45)',
+                    display: 'block',
+                    marginBottom: '10px',
+                  }}
+                >
+                  FurnitureHub
+                </span>
+                <h2
+                  style={{
+                    fontFamily: 'var(--font-serif)',
+                    fontSize: '2rem',
+                    fontWeight: 400,
+                    color: '#ffffff',
+                    marginBottom: '8px',
+                  }}
+                >
+                  Join FurnitureHub
+                </h2>
+                <p
+                  style={{
+                    fontSize: '13px',
+                    color: 'rgba(255, 255, 255, 0.6)',
+                    margin: 0,
+                  }}
+                >
+                  Create your account to save rooms and manage orders
+                </p>
+              </div>
+
+              <form onSubmit={handleSubmit}>
+                <div className="row">
+                  <div className="col-md-6 mb-3">
+                    <label
+                      htmlFor="first_name"
+                      style={{
+                        display: 'block',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'rgba(255, 255, 255, 0.85)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      First Name
+                    </label>
                     <input
                       type="text"
-                      className={`form-control ${errors.username ? 'is-invalid' : ''}`}
-                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.username ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
-                      id="username"
-                      name="username"
-                      value={formData.username}
+                      className={`form-control ${errors.first_name ? 'is-invalid' : ''}`}
+                      style={{
+                        background: '#1a1a1a',
+                        border: errors.first_name
+                          ? '1px solid #dc3545'
+                          : '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        padding: '12px 16px',
+                        fontSize: '14px',
+                        boxShadow: 'none',
+                      }}
+                      id="first_name"
+                      name="first_name"
+                      value={formData.first_name}
                       onChange={handleChange}
-                      placeholder="Choose a username"
+                      placeholder="First name"
                       required
                     />
-                    {errors.username && <div className="text-danger small mt-1">{errors.username}</div>}
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="email" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Email</label>
-                    <input
-                      type="email"
-                      className={`form-control ${errors.email ? 'is-invalid' : ''}`}
-                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.email ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
-                      id="email"
-                      name="email"
-                      value={formData.email}
-                      onChange={handleChange}
-                      placeholder="Enter your email"
-                      required
-                    />
-                    {errors.email && <div className="text-danger small mt-1">{errors.email}</div>}
-                  </div>
-                  <div className="mb-3">
-                    <label htmlFor="password" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Password</label>
-                    <input
-                      type="password"
-                      className={`form-control ${errors.password ? 'is-invalid' : ''}`}
-                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.password ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
-                      id="password"
-                      name="password"
-                      value={formData.password}
-                      onChange={handleChange}
-                      placeholder="Create a password"
-                      required
-                    />
-                    {errors.password && <div className="text-danger small mt-1">{errors.password}</div>}
-                  </div>
-                  <div className="mb-4">
-                    <label htmlFor="password_confirm" className={`form-label fw-bold ${isDarkTheme ? 'text-white' : 'text-dark'}`}>Confirm Password</label>
-                    <input
-                      type="password"
-                      className={`form-control ${errors.password_confirm ? 'is-invalid' : ''}`}
-                      style={{background: isDarkTheme ? 'rgba(255,255,255,0.1)' : '#ffffff', border: `1px solid ${errors.password_confirm ? '#dc3545' : isDarkTheme ? 'rgba(255,255,255,0.2)' : 'rgba(15,23,42,0.15)'}`, color: isDarkTheme ? 'white' : '#0f172a', borderRadius: '10px'}}
-                      id="password_confirm"
-                      name="password_confirm"
-                      value={formData.password_confirm}
-                      onChange={handleChange}
-                      placeholder="Confirm your password"
-                      required
-                    />
-                    {errors.password_confirm && <div className="text-danger small mt-1">{errors.password_confirm}</div>}
-                  </div>
-                  <button
-                    type="submit"
-                    className="btn w-100 fw-bold"
-                    style={{background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)', color: 'white', border: 'none', borderRadius: '10px', padding: '12px'}}
-                    disabled={loading}
-                  >
-                    {loading ? (
-                      <>
-                        <span className="spinner-border spinner-border-sm me-2" role="status"></span>
-                        Creating Account...
-                      </>
-                    ) : (
-                      <>
-                        <i className="fas fa-user-plus me-2"></i>
-                        Create Account
-                      </>
+                    {errors.first_name && (
+                      <div className="text-danger small mt-1">{errors.first_name}</div>
                     )}
-                  </button>
-                </form>
-                <div className="text-center mt-4">
-                  <p className={`${isDarkTheme ? 'text-muted' : 'text-secondary'} mb-0`}>Already have an account? <Link to="/login" style={{color: '#667eea', textDecoration: 'none', fontWeight: '500'}}>Sign In</Link></p>
+                  </div>
+
+                  <div className="col-md-6 mb-3">
+                    <label
+                      htmlFor="last_name"
+                      style={{
+                        display: 'block',
+                        fontSize: '11px',
+                        fontWeight: 600,
+                        letterSpacing: '0.1em',
+                        textTransform: 'uppercase',
+                        color: 'rgba(255, 255, 255, 0.85)',
+                        marginBottom: '8px',
+                      }}
+                    >
+                      Last Name
+                    </label>
+                    <input
+                      type="text"
+                      className={`form-control ${errors.last_name ? 'is-invalid' : ''}`}
+                      style={{
+                        background: '#1a1a1a',
+                        border: errors.last_name
+                          ? '1px solid #dc3545'
+                          : '1px solid rgba(255, 255, 255, 0.15)',
+                        color: '#ffffff',
+                        borderRadius: '8px',
+                        padding: '12px 16px',
+                        fontSize: '14px',
+                        boxShadow: 'none',
+                      }}
+                      id="last_name"
+                      name="last_name"
+                      value={formData.last_name}
+                      onChange={handleChange}
+                      placeholder="Last name"
+                      required
+                    />
+                    {errors.last_name && (
+                      <div className="text-danger small mt-1">{errors.last_name}</div>
+                    )}
+                  </div>
                 </div>
+
+                <div className="mb-3">
+                  <label
+                    htmlFor="username"
+                    style={{
+                      display: 'block',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(255, 255, 255, 0.85)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    Username
+                  </label>
+                  <input
+                    type="text"
+                    className={`form-control ${errors.username ? 'is-invalid' : ''}`}
+                    style={{
+                      background: '#1a1a1a',
+                      border: errors.username
+                        ? '1px solid #dc3545'
+                        : '1px solid rgba(255, 255, 255, 0.15)',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      boxShadow: 'none',
+                    }}
+                    id="username"
+                    name="username"
+                    value={formData.username}
+                    onChange={handleChange}
+                    placeholder="Choose a username"
+                    required
+                  />
+                  {errors.username && (
+                    <div className="text-danger small mt-1">{errors.username}</div>
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <label
+                    htmlFor="email"
+                    style={{
+                      display: 'block',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(255, 255, 255, 0.85)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    Email Address
+                  </label>
+                  <input
+                    type="email"
+                    className={`form-control ${errors.email ? 'is-invalid' : ''}`}
+                    style={{
+                      background: '#1a1a1a',
+                      border: errors.email
+                        ? '1px solid #dc3545'
+                        : '1px solid rgba(255, 255, 255, 0.15)',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      boxShadow: 'none',
+                    }}
+                    id="email"
+                    name="email"
+                    value={formData.email}
+                    onChange={handleChange}
+                    placeholder="Enter your email"
+                    required
+                  />
+                  {errors.email && (
+                    <div className="text-danger small mt-1">{errors.email}</div>
+                  )}
+                </div>
+
+                <div className="mb-3">
+                  <label
+                    htmlFor="password"
+                    style={{
+                      display: 'block',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(255, 255, 255, 0.85)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    Password
+                  </label>
+                  <input
+                    type="password"
+                    className={`form-control ${errors.password ? 'is-invalid' : ''}`}
+                    style={{
+                      background: '#1a1a1a',
+                      border: errors.password
+                        ? '1px solid #dc3545'
+                        : '1px solid rgba(255, 255, 255, 0.15)',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      boxShadow: 'none',
+                    }}
+                    id="password"
+                    name="password"
+                    value={formData.password}
+                    onChange={handleChange}
+                    placeholder="Create a password"
+                    required
+                  />
+                  {errors.password && (
+                    <div className="text-danger small mt-1">{errors.password}</div>
+                  )}
+                </div>
+
+                <div className="mb-4">
+                  <label
+                    htmlFor="password_confirm"
+                    style={{
+                      display: 'block',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.1em',
+                      textTransform: 'uppercase',
+                      color: 'rgba(255, 255, 255, 0.85)',
+                      marginBottom: '8px',
+                    }}
+                  >
+                    Confirm Password
+                  </label>
+                  <input
+                    type="password"
+                    className={`form-control ${errors.password_confirm ? 'is-invalid' : ''}`}
+                    style={{
+                      background: '#1a1a1a',
+                      border: errors.password_confirm
+                        ? '1px solid #dc3545'
+                        : '1px solid rgba(255, 255, 255, 0.15)',
+                      color: '#ffffff',
+                      borderRadius: '8px',
+                      padding: '12px 16px',
+                      fontSize: '14px',
+                      boxShadow: 'none',
+                    }}
+                    id="password_confirm"
+                    name="password_confirm"
+                    value={formData.password_confirm}
+                    onChange={handleChange}
+                    placeholder="Confirm your password"
+                    required
+                  />
+                  {errors.password_confirm && (
+                    <div className="text-danger small mt-1">{errors.password_confirm}</div>
+                  )}
+                </div>
+
+                <button
+                  type="submit"
+                  disabled={loading}
+                  style={{
+                    width: '100%',
+                    background: '#ffffff',
+                    color: '#000000',
+                    fontWeight: 700,
+                    fontSize: '12px',
+                    letterSpacing: '0.12em',
+                    textTransform: 'uppercase',
+                    padding: '14px',
+                    borderRadius: '8px',
+                    border: 'none',
+                    cursor: loading ? 'not-allowed' : 'pointer',
+                    transition: 'background 0.2s ease',
+                  }}
+                  onMouseEnter={(e) => !loading && (e.currentTarget.style.background = '#e2e2e2')}
+                  onMouseLeave={(e) => !loading && (e.currentTarget.style.background = '#ffffff')}
+                >
+                  {loading ? (
+                    <>
+                      <span className="spinner-border spinner-border-sm me-2" role="status" />
+                      Creating Account...
+                    </>
+                  ) : (
+                    'Create Account'
+                  )}
+                </button>
+              </form>
+
+              <div className="text-center mt-4 pt-2">
+                <p style={{ color: 'rgba(255, 255, 255, 0.55)', fontSize: '13px', margin: 0 }}>
+                  Already have an account?{' '}
+                  <Link
+                    to="/login"
+                    style={{
+                      color: '#ffffff',
+                      fontWeight: 600,
+                      textDecoration: 'underline',
+                      marginLeft: '4px',
+                    }}
+                  >
+                    Sign In
+                  </Link>
+                </p>
               </div>
             </div>
           </div>

@@ -66,6 +66,36 @@ const Home = () => {
     fetchData();
   }, []);
 
+  // Automatic 4-second loop carousel slider
+  useEffect(() => {
+    if (loading) return;
+    const carouselEl = document.getElementById('heroCarousel');
+    if (!carouselEl) return;
+
+    let carouselInstance = null;
+    if (window.bootstrap && window.bootstrap.Carousel) {
+      carouselInstance = window.bootstrap.Carousel.getOrCreateInstance(carouselEl, {
+        interval: 4000,
+        ride: 'carousel',
+        pause: false,
+        wrap: true,
+      });
+      carouselInstance.cycle();
+    }
+
+    const timer = setInterval(() => {
+      const nextBtn = carouselEl.querySelector('.carousel-control-next');
+      if (nextBtn) nextBtn.click();
+    }, 4000);
+
+    return () => {
+      clearInterval(timer);
+      if (carouselInstance && typeof carouselInstance.dispose === 'function') {
+        carouselInstance.dispose();
+      }
+    };
+  }, [loading]);
+
   if (loading) {
     return (
       <div className="d-flex justify-content-center align-items-center" style={{ height: '70vh', background: 'var(--bg-base)' }}>
@@ -79,54 +109,83 @@ const Home = () => {
   const defaultProducts = [
     {
       id: 1,
-      name: 'Wonban Dining Table',
-      price: 899,
-      image_url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=450&fit=crop',
-      category: 'Dining Table'
+      name: 'Modern Sectional Sofa',
+      price: 1299.99,
+      image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
+      category: 'Living Room',
+      slug: 'modern-sectional-sofa'
     },
     {
       id: 2,
-      name: 'Baekja Lounge Chair',
-      price: 649,
-      image_url: 'https://images.unsplash.com/photo-1549497538-303791108f95?w=600&h=450&fit=crop',
-      category: 'Lounge Chair'
+      name: 'Ergonomic Office Chair',
+      price: 299.99,
+      image_url: 'https://images.unsplash.com/photo-1541558869434-2840d308329a?w=600&h=450&fit=crop',
+      category: 'Office',
+      slug: 'ergonomic-office-chair'
     },
     {
       id: 3,
-      name: 'Cheongja Console',
-      price: 1299,
-      image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
-      category: 'Console'
+      name: 'Dining Table Set',
+      price: 899.99,
+      image_url: 'https://images.unsplash.com/photo-1549497538-303791108f95?w=600&h=450&fit=crop',
+      category: 'Dining Room',
+      slug: 'dining-table-set'
     },
     {
       id: 4,
-      name: 'Soban Side Table',
-      price: 399,
-      image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=600&h=450&fit=crop',
-      category: 'Side Table'
+      name: 'Queen Size Bed Frame',
+      price: 599.99,
+      image_url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&h=450&fit=crop',
+      category: 'Bedroom',
+      slug: 'queen-size-bed-frame'
     },
     {
       id: 5,
-      name: 'Minimalist Bed Frame',
-      price: 1499,
-      image_url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&h=450&fit=crop',
-      category: 'Bed'
+      name: 'Bookshelf Cabinet',
+      price: 399.99,
+      image_url: 'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=600&h=450&fit=crop',
+      category: 'Storage',
+      slug: 'bookshelf-cabinet'
     },
     {
       id: 6,
-      name: 'Heritage Low Bench',
-      price: 549,
-      image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
-      category: 'Bench'
+      name: 'Executive Desk',
+      price: 799.99,
+      image_url: 'https://images.unsplash.com/photo-1541746972996-4e0b0f93e586?w=600&h=450&fit=crop',
+      category: 'Office',
+      slug: 'executive-desk'
     }
   ];
 
   const displayList = recommendations.length > 0 ? recommendations : defaultProducts;
 
+  const collections = [
+    {
+      title: 'Table',
+      image: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800&fit=crop',
+      link: '/products?category=dining-room',
+    },
+    {
+      title: 'Chair',
+      image: 'https://images.unsplash.com/photo-1580481072645-022f9a6d859b?w=800&fit=crop',
+      link: '/products?category=office',
+    },
+    {
+      title: 'Sofa',
+      image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&fit=crop',
+      link: '/products?category=living-room',
+    },
+    {
+      title: 'Bed',
+      image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&fit=crop',
+      link: '/products?category=bedroom',
+    },
+  ];
+
   return (
     <div style={{ background: 'var(--bg-base)' }}>
       {/* ── Editorial Hero Section ── */}
-      <div id="heroCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="6000" style={{ position: 'relative' }}>
+      <div id="heroCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="4000" style={{ position: 'relative' }}>
         <div className="carousel-inner">
           <div className="carousel-item active">
             <div
@@ -237,6 +296,95 @@ const Home = () => {
           <span className="carousel-control-next-icon" />
         </button>
       </div>
+
+      {/* ── Shop Our Collections Section (Eastern Edition Style) ── */}
+      <section style={{ padding: '90px 0 70px 0', background: 'var(--bg-base)' }}>
+        <div className="container" style={{ maxWidth: '1400px' }}>
+          <div className="mb-5">
+            <h2
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: 'clamp(1.4rem, 2.5vw, 1.8rem)',
+                fontWeight: 500,
+                letterSpacing: '0.06em',
+                textTransform: 'uppercase',
+                color: 'var(--ink)',
+                marginBottom: '10px',
+              }}
+            >
+              SHOP OUR COLLECTIONS
+            </h2>
+            <p
+              style={{
+                fontSize: '0.95rem',
+                color: 'var(--ink-muted)',
+                margin: 0,
+                maxWidth: '750px',
+                lineHeight: 1.6,
+                fontWeight: 400,
+              }}
+            >
+              The importance of heritage, locality, and sustainability is the grounding vision for Eastern Edition.
+            </p>
+          </div>
+
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
+              gap: '20px',
+            }}
+          >
+            {collections.map((item, index) => (
+              <Link
+                key={index}
+                to={item.link}
+                style={{ textDecoration: 'none', color: 'inherit' }}
+                className="collection-card-item"
+              >
+                <div
+                  style={{
+                    position: 'relative',
+                    background: 'var(--bg-surface)',
+                    aspectRatio: '1 / 1',
+                    overflow: 'hidden',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    padding: '30px',
+                    transition: 'background-color 0.3s ease',
+                  }}
+                >
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    style={{
+                      maxWidth: '90%',
+                      maxHeight: '90%',
+                      objectFit: 'contain',
+                      transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
+                    }}
+                    className="collection-card-img"
+                  />
+                  <span
+                    style={{
+                      position: 'absolute',
+                      bottom: '20px',
+                      left: '20px',
+                      fontSize: '0.9rem',
+                      fontWeight: 400,
+                      color: 'var(--ink)',
+                      letterSpacing: '0.01em',
+                    }}
+                  >
+                    {item.title}
+                  </span>
+                </div>
+              </Link>
+            ))}
+          </div>
+        </div>
+      </section>
 
       {/* ── Featured Selections Section ── */}
       <section style={{ padding: '100px 0 120px 0', background: 'var(--bg-base)' }}>
