@@ -9,6 +9,15 @@
     <meta name="theme-color" content="#6D5EF5" />
     <title>FurnitureZone — Premium Furniture &amp; Home Decor</title>
 
+    <!-- Suppress harmless Bootstrap hot-reload errors during development -->
+    <script>
+      window.addEventListener('error', function(e) {
+        if (e.message === 'Script error.') {
+          e.stopImmediatePropagation();
+        }
+      }, true);
+    </script>
+
     <!-- Google Fonts: Inter + Playfair Display -->
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
