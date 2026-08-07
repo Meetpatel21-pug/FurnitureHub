@@ -44,83 +44,202 @@ const ProductCard = ({ product }) => {
     } else toast.error(result.error);
   };
 
-  const inWishlist  = isInWishlist(product.id);
-  const rating      = product.average_rating || 4.2;
-  const reviewCount = product.review_count   || 0;
+  const inWishlist   = isInWishlist(product.id);
+  const rating       = product.average_rating || 4.2;
+  const reviewCount  = product.review_count   || 0;
   const categoryName = product.category?.name || product.category || 'Furniture';
-  const isOutOfStock = !product.available || product.stock === 0;
+  const isOutOfStock = product.available === false || (product.stock !== undefined && product.stock <= 0);
 
   return (
-    <div className="modern-product-card" id={`product-card-${product.id}`}>
-
-      {/* ── Image ── */}
-      <div className="product-image-container">
+    <div
+      className="eastern-product-card"
+      id={`product-card-${product.id}`}
+      style={{
+        background: 'transparent',
+        display: 'flex',
+        flexDirection: 'column',
+        position: 'relative',
+      }}
+    >
+      {/* ── Image Container ── */}
+      <div
+        className="product-image-container"
+        style={{
+          position: 'relative',
+          aspectRatio: '4 / 3',
+          background: 'var(--bg-muted)',
+          overflow: 'hidden',
+          marginBottom: '16px',
+        }}
+      >
         <Link to={`/products/${product.slug}`} tabIndex={-1} aria-label={`View ${product.name}`}>
           <img
             src={product.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&h=400&fit=crop'}
             className="product-image"
             alt={product.name}
             loading="lazy"
+            style={{
+              width: '100%',
+              height: '100%',
+              objectFit: 'cover',
+              transition: 'transform 0.6s cubic-bezier(0.23, 1, 0.32, 1)',
+            }}
           />
         </Link>
 
-        {/* Category badge */}
-        <span className="product-category-badge">{categoryName}</span>
+        {/* Category tag */}
+        <span
+          style={{
+            position: 'absolute',
+            top: '12px',
+            left: '12px',
+            fontSize: '10px',
+            fontFamily: 'var(--font-sans)',
+            fontWeight: 500,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            color: 'var(--ink)',
+            background: 'rgba(255,255,255,0.85)',
+            padding: '4px 8px',
+          }}
+        >
+          {categoryName}
+        </span>
 
-        {/* Glass wishlist button */}
+        {/* Wishlist Button */}
         <button
           className={`wishlist-btn${inWishlist ? ' active' : ''}`}
           onClick={handleWishlist}
           aria-label={inWishlist ? 'Remove from wishlist' : 'Add to wishlist'}
           id={`wishlist-btn-${product.id}`}
+          style={{
+            position: 'absolute',
+            top: '12px',
+            right: '12px',
+            width: '32px',
+            height: '32px',
+            background: 'rgba(255,255,255,0.85)',
+            border: 'none',
+            color: inWishlist ? '#e53e3e' : 'var(--ink)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            cursor: 'pointer',
+            fontSize: '13px',
+            transition: 'all 0.2s ease',
+          }}
         >
           <i className={inWishlist ? 'fas fa-heart' : 'far fa-heart'} />
         </button>
 
-        {/* Out of stock badge */}
+        {/* Out of Stock tag */}
         {isOutOfStock && (
-          <span className="stock-badge out-of-stock">Out of Stock</span>
+          <span
+            style={{
+              position: 'absolute',
+              bottom: '12px',
+              left: '12px',
+              fontSize: '10px',
+              fontFamily: 'var(--font-sans)',
+              fontWeight: 600,
+              letterSpacing: '0.1em',
+              textTransform: 'uppercase',
+              background: '#111',
+              color: '#fff',
+              padding: '4px 10px',
+            }}
+          >
+            Out of Stock
+          </span>
         )}
       </div>
 
       {/* ── Content ── */}
-      <div className="product-content">
-        <div className="product-category">{categoryName}</div>
-
-        <h3 className="product-title">
-          <Link to={`/products/${product.slug}`}>{product.name}</Link>
+      <div style={{ padding: '0 4px', flex: 1, display: 'flex', flexDirection: 'column' }}>
+        <h3
+          style={{
+            fontFamily: 'var(--font-serif)',
+            fontSize: '1.25rem',
+            fontWeight: 400,
+            lineHeight: 1.25,
+            margin: '0 0 6px 0',
+          }}
+        >
+          <Link
+            to={`/products/${product.slug}`}
+            style={{ color: 'var(--ink)', textDecoration: 'none' }}
+          >
+            {product.name}
+          </Link>
         </h3>
 
-        <div className="product-rating">
-          <div className="stars">{renderStars(rating)}</div>
-          {reviewCount > 0 && (
-            <span className="rating-count">({reviewCount})</span>
-          )}
+        {/* Ratings & Price row */}
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '12px' }}>
+          <div style={{ fontSize: '14px', fontWeight: 500, color: 'var(--ink)' }}>
+            {formatPrice(product.price)}
+            {product.original_price && product.original_price > product.price && (
+              <span
+                style={{
+                  fontSize: '12px',
+                  color: 'var(--ink-light)',
+                  textDecoration: 'line-through',
+                  marginLeft: '8px',
+                }}
+              >
+                {formatPrice(product.original_price)}
+              </span>
+            )}
+          </div>
+
+          <div style={{ display: 'flex', alignItems: 'center', gap: '4px', fontSize: '11px', color: '#f59e0b' }}>
+            <div className="stars">{renderStars(rating)}</div>
+            {reviewCount > 0 && (
+              <span style={{ color: 'var(--ink-light)', fontSize: '10px', marginLeft: '2px' }}>({reviewCount})</span>
+            )}
+          </div>
         </div>
 
-        <div className="product-price">
-          <span className="current-price">{formatPrice(product.price)}</span>
-          {product.original_price && product.original_price > product.price && (
-            <span className="original-price">{formatPrice(product.original_price)}</span>
-          )}
-        </div>
-
-        <div className="product-actions">
-          <button
-            className="add-to-cart-btn"
-            onClick={handleAddToCart}
-            disabled={isOutOfStock || adding}
-            id={`add-to-cart-btn-${product.id}`}
-            aria-label={`Add ${product.name} to cart`}
-          >
-            {adding
-              ? <><div className="spinner-ring" style={{ width: 16, height: 16, borderWidth: 2 }} />Adding…</>
-              : isOutOfStock
-              ? <><i className="fas fa-ban" />Out of Stock</>
-              : <><i className="fas fa-shopping-bag" />Add to Cart</>
+        {/* Add to Cart button */}
+        <button
+          onClick={handleAddToCart}
+          disabled={isOutOfStock || adding}
+          id={`add-to-cart-btn-${product.id}`}
+          aria-label={`Add ${product.name} to cart`}
+          style={{
+            marginTop: 'auto',
+            width: '100%',
+            padding: '10px 16px',
+            background: 'transparent',
+            border: '1px solid var(--ink)',
+            color: 'var(--ink)',
+            fontFamily: 'var(--font-sans)',
+            fontSize: '11px',
+            fontWeight: 600,
+            letterSpacing: '0.12em',
+            textTransform: 'uppercase',
+            cursor: isOutOfStock ? 'not-allowed' : 'pointer',
+            opacity: isOutOfStock ? 0.5 : 1,
+            transition: 'background 0.2s ease, color 0.2s ease',
+          }}
+          onMouseEnter={(e) => {
+            if (!isOutOfStock && !adding) {
+              e.currentTarget.style.background = 'var(--ink)';
+              e.currentTarget.style.color = '#fff';
             }
-          </button>
-        </div>
+          }}
+          onMouseLeave={(e) => {
+            if (!isOutOfStock && !adding) {
+              e.currentTarget.style.background = 'transparent';
+              e.currentTarget.style.color = 'var(--ink)';
+            }
+          }}
+        >
+          {adding
+            ? 'Adding…'
+            : isOutOfStock
+            ? 'Out of Stock'
+            : 'Add to Cart'}
+        </button>
       </div>
     </div>
   );

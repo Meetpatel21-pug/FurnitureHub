@@ -102,13 +102,16 @@ ROOM_AI_CNN_CLASSES = [
 XAI_API_KEY = config('XAI_API_KEY', default='')
 XAI_MODEL = config('XAI_MODEL', default='grok-4.3')
 
-EMAIL_BACKEND = 'django.core.mail.backends.smtp.EmailBackend'
+EMAIL_BACKEND = 'store.email_backend.NoVerifyEmailBackend'
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp.gmail.com')
 EMAIL_PORT = int(os.environ.get('EMAIL_PORT', '587'))
 EMAIL_USE_TLS = os.environ.get('EMAIL_USE_TLS', 'True').lower() == 'true'
+EMAIL_USE_SSL = False
 EMAIL_HOST_USER = os.environ.get('EMAIL_HOST_USER', 'meetparsana211@gmail.com')
 EMAIL_HOST_PASSWORD = os.environ.get('EMAIL_HOST_PASSWORD', 'mwrttuedasolrilo')
 DEFAULT_FROM_EMAIL = os.environ.get('DEFAULT_FROM_EMAIL', EMAIL_HOST_USER)
 ORDER_CONFIRMATION_FALLBACK_EMAIL = os.environ.get('ORDER_CONFIRMATION_FALLBACK_EMAIL', 'meetparsana211@gmail.com')
+EMAIL_SSL_CERTFILE = None
+EMAIL_SSL_KEYFILE = None
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'

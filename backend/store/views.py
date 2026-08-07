@@ -544,6 +544,116 @@ def login(request):
         return response
     return Response({'error': 'Invalid credentials'}, status=status.HTTP_401_UNAUTHORIZED)
 
+# In-memory OTP store: {email: {'otp': str, 'expires': datetime}}
+_otp_store = {}
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def forgot_password(request):
+    import random
+    from datetime import datetime, timedelta
+    email = request.data.get('email', '').strip()
+    if not email:
+        return Response({'error': 'Email is required'}, status=status.HTTP_400_BAD_REQUEST)
+    if not User.objects.filter(email=email).exists():
+        return Response({'error': 'No account found with this email'}, status=status.HTTP_404_NOT_FOUND)
+
+    otp = str(random.randint(100000, 999999))
+    _otp_store[email] = {'otp': otp, 'expires': datetime.now() + timedelta(minutes=10)}
+
+    html = f"""
+    <div style="font-family:Arial,sans-serif;max-width:480px;margin:auto;padding:32px;border:1px solid #e5e7eb;border-radius:12px;">
+        <h2 style="color:#667eea;">Password Reset OTP</h2>
+        <p>Your OTP for resetting your FurnitureHub password is:</p>
+        <div style="font-size:36px;font-weight:bold;letter-spacing:8px;color:#764ba2;text-align:center;padding:16px;background:#f3f4f6;border-radius:8px;">{otp}</div>
+        <p style="color:#6b7280;margin-top:16px;">This OTP is valid for <strong>10 minutes</strong>. Do not share it with anyone.</p>
+    </div>
+    """
+    logger = logging.getLogger(__name__)
+    try:
+        # Primary: use Django's built-in email backend (respects settings.py)
+        from django.core.mail import send_mail
+        send_mail(
+            subject='FurnitureHub - Password Reset OTP',
+            message=f'Your OTP is: {otp}. Valid for 10 minutes.',
+            from_email=settings.DEFAULT_FROM_EMAIL,
+            recipient_list=[email],
+            html_message=html,
+            fail_silently=False,
+        )
+    except Exception as primary_err:
+        logger.error(f'[ForgotPassword] Django send_mail failed: {primary_err}')
+        # Fallback: raw smtplib with SSL verification disabled (handles proxy/antivirus MITM)
+        try:
+            context = ssl.create_default_context()
+            context.check_hostname = False
+            context.verify_mode = ssl.CERT_NONE
+            msg = MIMEMultipart('alternative')
+            msg['Subject'] = 'FurnitureHub - Password Reset OTP'
+            msg['From'] = settings.DEFAULT_FROM_EMAIL
+            msg['To'] = email
+            msg.attach(MIMEText(f'Your OTP is: {otp}. Valid for 10 minutes.', 'plain'))
+            msg.attach(MIMEText(html, 'html'))
+            with smtplib.SMTP(settings.EMAIL_HOST, settings.EMAIL_PORT, timeout=30) as server:
+                server.ehlo()
+                if settings.EMAIL_USE_TLS:
+                    server.starttls(context=context)
+                    server.ehlo()
+                server.login(settings.EMAIL_HOST_USER, settings.EMAIL_HOST_PASSWORD)
+                server.sendmail(settings.DEFAULT_FROM_EMAIL, [email], msg.as_string())
+        except Exception as fallback_err:
+            logger.error(f'[ForgotPassword] Fallback smtplib also failed: {fallback_err}')
+            return Response(
+                {'error': f'Failed to send OTP: {fallback_err}'},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR
+            )
+
+    return Response({'message': 'OTP sent to your email'})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def verify_otp(request):
+    from datetime import datetime
+    email = request.data.get('email', '').strip()
+    otp = request.data.get('otp', '').strip()
+    record = _otp_store.get(email)
+    if not record:
+        return Response({'error': 'OTP not found. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
+    if datetime.now() > record['expires']:
+        _otp_store.pop(email, None)
+        return Response({'error': 'OTP has expired. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
+    if record['otp'] != otp:
+        return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+    return Response({'message': 'OTP verified'})
+
+
+@api_view(['POST'])
+@permission_classes([AllowAny])
+def reset_password(request):
+    from datetime import datetime
+    email = request.data.get('email', '').strip()
+    otp = request.data.get('otp', '').strip()
+    new_password = request.data.get('new_password', '')
+    record = _otp_store.get(email)
+    if not record:
+        return Response({'error': 'OTP not found. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
+    if datetime.now() > record['expires']:
+        _otp_store.pop(email, None)
+        return Response({'error': 'OTP has expired. Please request a new one.'}, status=status.HTTP_400_BAD_REQUEST)
+    if record['otp'] != otp:
+        return Response({'error': 'Invalid OTP'}, status=status.HTTP_400_BAD_REQUEST)
+    if len(new_password) < 6:
+        return Response({'error': 'Password must be at least 6 characters'}, status=status.HTTP_400_BAD_REQUEST)
+    user = User.objects.filter(email=email).first()
+    if not user:
+        return Response({'error': 'User not found'}, status=status.HTTP_404_NOT_FOUND)
+    user.set_password(new_password)
+    user.save()
+    _otp_store.pop(email, None)
+    return Response({'message': 'Password reset successfully'})
+
+
 # Category Views
 class CategoryListView(generics.ListAPIView):
     queryset = Category.objects.all()

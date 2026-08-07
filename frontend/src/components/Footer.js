@@ -5,157 +5,186 @@ const Footer = () => {
   const [email, setEmail] = useState('');
 
   return (
-    <footer className="footer-gradient">
-      <div className="footer-container">
-
-        {/* ── Main grid ── */}
-        <div className="footer-grid">
-
-          {/* Brand column */}
-          <div>
-            <div className="footer-brand">
-              <div className="footer-brand-icon">
-                <i className="fas fa-couch" style={{ color: '#fff', fontSize: 16 }}></i>
-              </div>
-              FurnitureHub<span style={{ color: 'var(--accent)' }}>.</span>
+    <footer
+      style={{
+        background: '#111111',
+        color: '#ffffff',
+        paddingTop: '80px',
+        paddingBottom: '40px',
+        fontFamily: 'var(--font-sans)',
+        fontSize: '13px',
+      }}
+    >
+      <div className="container" style={{ maxWidth: '1400px' }}>
+        {/* Main Grid */}
+        <div className="row g-5 mb-5 pb-4" style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+          {/* Newsletter Column */}
+          <div className="col-lg-4 col-md-6">
+            <div className="mb-3 d-flex align-items-center gap-2">
+              <i className="fas fa-cubes" style={{ fontSize: '18px', color: '#fff' }} />
+              <span
+                style={{
+                  fontFamily: 'var(--font-sans)',
+                  fontSize: '13px',
+                  fontWeight: 700,
+                  letterSpacing: '0.18em',
+                  textTransform: 'uppercase',
+                }}
+              >
+                NEWSLETTER
+              </span>
             </div>
-            <p className="footer-text">
-              Transform your living spaces with handcrafted furniture that blends timeless elegance with modern comfort. Premium quality, delivered to your door.
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', marginBottom: '20px', lineHeight: 1.6 }}>
+              Subscribe to receive updates, access to exclusive deals, and more.
             </p>
-            <div className="social-links">
-              {[
-                { icon: 'fa-facebook-f', href: '#', label: 'Facebook' },
-                { icon: 'fa-instagram', href: '#', label: 'Instagram' },
-                { icon: 'fa-twitter', href: '#', label: 'Twitter' },
-                { icon: 'fa-pinterest-p', href: '#', label: 'Pinterest' },
-              ].map(s => (
-                <a
-                  key={s.label}
-                  href={s.href}
-                  className="social-link"
-                  aria-label={s.label}
-                  rel="noopener noreferrer"
-                >
-                  <i className={`fab ${s.icon}`}></i>
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Quick Links */}
-          <div>
-            <h6 className="footer-heading">Quick Links</h6>
-            <ul className="footer-links">
-              {[
-                { label: 'Home', to: '/' },
-                { label: 'Products', to: '/products' },
-                { label: 'Room AI', to: '/room-ai' },
-                { label: 'About Us', to: '/about' },
-                { label: 'Contact', to: '/contact' },
-              ].map(l => (
-                <li key={l.label}>
-                  <Link to={l.to} className="footer-link">{l.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Categories */}
-          <div>
-            <h6 className="footer-heading">Categories</h6>
-            <ul className="footer-links">
-              {[
-                { label: 'Living Room', slug: 'living-room' },
-                { label: 'Bedroom', slug: 'bedroom' },
-                { label: 'Dining Room', slug: 'dining-room' },
-                { label: 'Office', slug: 'office' },
-                { label: 'Storage', slug: 'storage' },
-              ].map(c => (
-                <li key={c.label}>
-                  <Link to={`/products?category=${c.slug}`} className="footer-link">{c.label}</Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Contact + Newsletter */}
-          <div>
-            <h6 className="footer-heading">Get in Touch</h6>
-            <div style={{ marginBottom: 24 }}>
-              {[
-                { icon: 'fa-map-marker-alt', text: '123 Furniture Street, Design City' },
-                { icon: 'fa-phone', text: '+91 1234 567 890' },
-                { icon: 'fa-envelope', text: 'hello@furniturezone.com' },
-              ].map(item => (
-                <div className="contact-item" key={item.text}>
-                  <i className={`fas ${item.icon}`}></i>
-                  <span>{item.text}</span>
-                </div>
-              ))}
-            </div>
-
-            {/* Mini newsletter */}
-            <h6 className="footer-heading">Newsletter</h6>
             <form
-              onSubmit={e => { e.preventDefault(); setEmail(''); }}
-              style={{ display: 'flex', gap: 8 }}
+              onSubmit={(e) => { e.preventDefault(); setEmail(''); }}
+              style={{ display: 'flex', gap: '0', flexDirection: 'column' }}
               id="footer-newsletter-form"
             >
               <input
                 type="email"
                 value={email}
-                onChange={e => setEmail(e.target.value)}
-                placeholder="Your email"
+                onChange={(e) => setEmail(e.target.value)}
+                placeholder="SUBSCRIBE TO OUR NEWSLETTER"
                 required
                 id="footer-newsletter-email"
                 style={{
-                  flex: 1,
-                  padding: '10px 14px',
-                  borderRadius: 'var(--r-md)',
-                  border: '1.5px solid rgba(255,255,255,0.10)',
-                  background: 'rgba(255,255,255,0.06)',
+                  width: '100%',
+                  padding: '12px 0',
+                  border: 'none',
+                  borderBottom: '1px solid rgba(255,255,255,0.3)',
+                  background: 'transparent',
                   color: '#fff',
-                  fontSize: 13,
+                  fontSize: '11px',
+                  letterSpacing: '0.1em',
                   outline: 'none',
-                  fontFamily: 'var(--font-sans)',
-                  minWidth: 0,
+                  marginBottom: '16px',
                 }}
               />
               <button
                 type="submit"
                 id="footer-newsletter-btn"
                 style={{
-                  padding: '10px 14px',
-                  borderRadius: 'var(--r-md)',
-                  border: 'none',
-                  background: 'var(--grad-accent)',
-                  color: '#fff',
+                  padding: '12px 24px',
+                  border: '1px solid #ffffff',
+                  background: 'transparent',
+                  color: '#ffffff',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
                   cursor: 'pointer',
-                  fontSize: 13,
-                  fontFamily: 'var(--font-sans)',
-                  whiteSpace: 'nowrap',
-                  flexShrink: 0,
+                  alignSelf: 'flex-start',
+                  transition: 'all 0.2s ease',
                 }}
+                onMouseEnter={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#111'; }}
+                onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#fff'; }}
               >
-                Subscribe
+                SUBSCRIBE
               </button>
             </form>
           </div>
-        </div>
 
-        {/* ── Divider + Bottom bar ── */}
-        <hr className="footer-divider" />
-        <div className="footer-bottom footer-container" style={{ paddingLeft: 0, paddingRight: 0 }}>
-          <p className="footer-copyright">
-            &copy; {new Date().getFullYear()} FurnitureHub. All rights reserved.
-          </p>
-          <div className="footer-bottom-links">
-            <a href="#">Privacy Policy</a>
-            <a href="#">Terms of Service</a>
-            <a href="#">Cookie Policy</a>
+          {/* Contact Column */}
+          <div className="col-lg-3 col-md-6">
+            <h6
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                marginBottom: '20px',
+                color: '#fff',
+              }}
+            >
+              CONTACT
+            </h6>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', marginBottom: '8px' }}>
+              T. 070. 8129. 1111
+            </p>
+            <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', marginBottom: '24px' }}>
+              E. contact@furniturehub.com
+            </p>
+
+            <div style={{ display: 'flex', gap: '16px', fontSize: '16px', color: 'rgba(255,255,255,0.7)' }}>
+              {['instagram', 'pinterest', 'youtube', 'facebook-f'].map((icon) => (
+                <a key={icon} href="#" style={{ color: 'inherit', transition: 'color 0.2s' }}>
+                  <i className={`fab fa-${icon}`} />
+                </a>
+              ))}
+            </div>
+          </div>
+
+          {/* Products Column */}
+          <div className="col-lg-2 col-md-6">
+            <h6
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                marginBottom: '20px',
+                color: '#fff',
+              }}
+            >
+              PRODUCTS
+            </h6>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {[
+                { label: 'Living Room', slug: 'living-room' },
+                { label: 'Bedroom', slug: 'bedroom' },
+                { label: 'Dining Room', slug: 'dining-room' },
+                { label: 'Office', slug: 'office' },
+                { label: 'Storage', slug: 'storage' },
+              ].map((c) => (
+                <li key={c.label}>
+                  <Link
+                    to={`/products?category=${c.slug}`}
+                    style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '12px' }}
+                  >
+                    {c.label}
+                  </Link>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Client Service Column */}
+          <div className="col-lg-3 col-md-6">
+            <h6
+              style={{
+                fontSize: '12px',
+                fontWeight: 700,
+                letterSpacing: '0.15em',
+                textTransform: 'uppercase',
+                marginBottom: '20px',
+                color: '#fff',
+              }}
+            >
+              CLIENT SERVICE &amp; LEGAL
+            </h6>
+            <ul style={{ listStyle: 'none', padding: 0, margin: 0, display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              {['FAQ', 'Contact Us', 'Privacy Policy', 'Terms of Use', 'Room AI Generator'].map((item) => (
+                <li key={item}>
+                  <a href="#" style={{ color: 'rgba(255,255,255,0.6)', textDecoration: 'none', fontSize: '12px' }}>
+                    {item}
+                  </a>
+                </li>
+              ))}
+            </ul>
           </div>
         </div>
 
+        {/* Bottom Legal / Copyright Bar */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
+            COMPANY: FurnitureHub Co., Ltd. ADDRESS: Design District 17, Seoul / Gangnam. E-MAIL: contact@furniturehub.com
+          </p>
+          <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
+            &copy; {new Date().getFullYear()} FURNITUREHUB All rights reserved.
+          </p>
+        </div>
       </div>
     </footer>
   );

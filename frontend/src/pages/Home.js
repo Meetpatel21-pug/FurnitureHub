@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback } from 'react';
 import { Link } from 'react-router-dom';
 import { mlAPI, ordersAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
+import ProductCard from '../components/ProductCard';
 
 const Home = () => {
   const { user } = useAuth();
@@ -15,7 +16,6 @@ const Home = () => {
       const recommendationsRes = await mlAPI.getRecommendations('knn', 6);
       const recommendationsData = recommendationsRes.data.recommendations || [];
       setRecommendations(Array.isArray(recommendationsData) ? recommendationsData : []);
-      console.log('KNN Recommendations refreshed:', recommendationsData);
     } catch (error) {
       console.error('Error fetching recommendations:', error);
     }
@@ -33,10 +33,8 @@ const Home = () => {
             const latestOrder = orders[0];
             const orderTime = new Date(latestOrder.created_at).getTime();
 
-            // If there's a new order or first load
             if (!lastOrderTime || orderTime > lastOrderTime) {
               setLastOrderTime(orderTime);
-              // Refresh recommendations based on new order
               fetchRecommendations();
             }
           }
@@ -46,8 +44,6 @@ const Home = () => {
       };
 
       checkForNewOrders();
-
-      // Poll for new orders every 30 seconds
       const interval = setInterval(checkForNewOrders, 30000);
       return () => clearInterval(interval);
     }
@@ -59,8 +55,6 @@ const Home = () => {
         const recommendationsRes = await mlAPI.getRecommendations('knn', 6).catch(() => ({ data: { recommendations: [] } }));
         const recommendationsData = recommendationsRes.data.recommendations || [];
         setRecommendations(Array.isArray(recommendationsData) ? recommendationsData : []);
-
-        console.log('KNN Recommendations:', recommendationsData);
       } catch (error) {
         console.error('Error fetching data:', error);
         setRecommendations([]);
@@ -74,187 +68,217 @@ const Home = () => {
 
   if (loading) {
     return (
-      <div className="d-flex justify-content-center align-items-center" style={{ height: '50vh' }}>
-        <div className="spinner-border text-primary" role="status">
+      <div className="d-flex justify-content-center align-items-center" style={{ height: '70vh', background: 'var(--bg-base)' }}>
+        <div className="spinner-border text-dark" role="status" style={{ width: '2rem', height: '2rem' }}>
           <span className="visually-hidden">Loading...</span>
         </div>
       </div>
     );
   }
 
+  const defaultProducts = [
+    {
+      id: 1,
+      name: 'Wonban Dining Table',
+      price: 899,
+      image_url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=600&h=450&fit=crop',
+      category: 'Dining Table'
+    },
+    {
+      id: 2,
+      name: 'Baekja Lounge Chair',
+      price: 649,
+      image_url: 'https://images.unsplash.com/photo-1549497538-303791108f95?w=600&h=450&fit=crop',
+      category: 'Lounge Chair'
+    },
+    {
+      id: 3,
+      name: 'Cheongja Console',
+      price: 1299,
+      image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
+      category: 'Console'
+    },
+    {
+      id: 4,
+      name: 'Soban Side Table',
+      price: 399,
+      image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=600&h=450&fit=crop',
+      category: 'Side Table'
+    },
+    {
+      id: 5,
+      name: 'Minimalist Bed Frame',
+      price: 1499,
+      image_url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=600&h=450&fit=crop',
+      category: 'Bed'
+    },
+    {
+      id: 6,
+      name: 'Heritage Low Bench',
+      price: 549,
+      image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=600&h=450&fit=crop',
+      category: 'Bench'
+    }
+  ];
+
+  const displayList = recommendations.length > 0 ? recommendations : defaultProducts;
+
   return (
-    <div>
-      {/* Hero Carousel */}
-      <div id="heroCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="4000">
-        <div className="carousel-indicators">
-          <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="0" className="active"></button>
-          <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="1"></button>
-          <button type="button" data-bs-target="#heroCarousel" data-bs-slide-to="2"></button>
-        </div>
+    <div style={{ background: 'var(--bg-base)' }}>
+      {/* ── Editorial Hero Section ── */}
+      <div id="heroCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="6000" style={{ position: 'relative' }}>
         <div className="carousel-inner">
           <div className="carousel-item active">
-            <div className="hero-slide" style={{
-              backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1920&h=800&fit=crop)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              height: '85vh',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'all 1s ease-in-out'
-            }}>
-              <div className="container text-center text-white">
-                <h1 className="display-2 fw-bold mb-4 animate__animated animate__fadeInUp">Luxury Living Redefined</h1>
-                <p className="lead mb-5 animate__animated animate__fadeInUp animate__delay-1s">Transform your home with our exquisite furniture collection</p>
-                <Link to="/products" className="btn btn-primary btn-lg px-5 py-3 animate__animated animate__fadeInUp animate__delay-2s">
-                  Discover Collection <i className="fas fa-arrow-right ms-2"></i>
-                </Link>
+            <div
+              style={{
+                backgroundImage: 'linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.25)), url(https://images.unsplash.com/photo-1631679706909-1844bbd07221?w=1920&h=1080&fit=crop)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'flex-end',
+                paddingBottom: '100px',
+              }}
+            >
+              <div className="container" style={{ maxWidth: '1400px' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '11px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                    EASTERN ESSENCE &amp; MODERN MINIMALISM
+                  </span>
+                  <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 300, color: '#fff', lineHeight: 1.05, margin: '16px 0 24px 0' }}>
+                    Structure &amp; Silence.
+                  </h1>
+                  <Link
+                    to="/products"
+                    style={{
+                      display: 'inline-block',
+                      padding: '14px 32px',
+                      border: '1px solid #ffffff',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                      transition: 'all 0.25s ease',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#111'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#fff'; }}
+                  >
+                    DISCOVER COLLECTION
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
+
           <div className="carousel-item">
-            <div className="hero-slide" style={{
-              backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&h=800&fit=crop)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              height: '85vh',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'all 1s ease-in-out'
-            }}>
-              <div className="container text-center text-white">
-                <h1 className="display-2 fw-bold mb-4">Modern Elegance</h1>
-                <p className="lead mb-5">Where comfort meets contemporary design</p>
-                <Link to="/products" className="btn btn-outline-light btn-lg px-5 py-3">
-                  Shop Now <i className="fas fa-shopping-bag ms-2"></i>
-                </Link>
-              </div>
-            </div>
-          </div>
-          <div className="carousel-item">
-            <div className="hero-slide" style={{
-              backgroundImage: 'linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.3)), url(https://images.unsplash.com/photo-1540932239986-30128078f3c5?w=1920&h=800&fit=crop)',
-              backgroundSize: 'cover',
-              backgroundPosition: 'center',
-              height: '85vh',
-              display: 'flex',
-              alignItems: 'center',
-              transition: 'all 1s ease-in-out'
-            }}>
-              <div className="container text-center text-white">
-                <h1 className="display-2 fw-bold mb-4">Crafted Perfection</h1>
-                <p className="lead mb-5">Premium materials, exceptional craftsmanship</p>
-                <Link to="/about" className="btn btn-light btn-lg px-5 py-3">
-                  Our Story <i className="fas fa-heart ms-2"></i>
-                </Link>
+            <div
+              style={{
+                backgroundImage: 'linear-gradient(rgba(0,0,0,0.35), rgba(0,0,0,0.25)), url(https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=1920&h=1080&fit=crop)',
+                backgroundSize: 'cover',
+                backgroundPosition: 'center',
+                height: '100vh',
+                display: 'flex',
+                alignItems: 'flex-end',
+                paddingBottom: '100px',
+              }}
+            >
+              <div className="container" style={{ maxWidth: '1400px' }}>
+                <div style={{ maxWidth: '650px' }}>
+                  <span style={{ color: 'rgba(255,255,255,0.8)', fontSize: '11px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase' }}>
+                    CRAFTED PERFECTION
+                  </span>
+                  <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(3rem, 6vw, 5rem)', fontWeight: 300, color: '#fff', lineHeight: 1.05, margin: '16px 0 24px 0' }}>
+                    Harmonious Living Space.
+                  </h1>
+                  <Link
+                    to="/products"
+                    style={{
+                      display: 'inline-block',
+                      padding: '14px 32px',
+                      border: '1px solid #ffffff',
+                      color: '#ffffff',
+                      textDecoration: 'none',
+                      fontSize: '11px',
+                      fontWeight: 600,
+                      letterSpacing: '0.15em',
+                      textTransform: 'uppercase',
+                      transition: 'all 0.25s ease',
+                    }}
+                    onMouseEnter={(e) => { e.currentTarget.style.background = '#fff'; e.currentTarget.style.color = '#111'; }}
+                    onMouseLeave={(e) => { e.currentTarget.style.background = 'transparent'; e.currentTarget.style.color = '#fff'; }}
+                  >
+                    EXPLORE NOW
+                  </Link>
+                </div>
               </div>
             </div>
           </div>
         </div>
-        <button className="carousel-control-prev" type="button" data-bs-target="#heroCarousel" data-bs-slide="prev">
-          <span className="carousel-control-prev-icon"></span>
+
+        {/* Minimal slide controls */}
+        <button
+          className="carousel-control-prev"
+          type="button"
+          data-bs-target="#heroCarousel"
+          data-bs-slide="prev"
+          style={{ width: '5%', opacity: 0.7 }}
+        >
+          <span className="carousel-control-prev-icon" />
         </button>
-        <button className="carousel-control-next" type="button" data-bs-target="#heroCarousel" data-bs-slide="next">
-          <span className="carousel-control-next-icon"></span>
+        <button
+          className="carousel-control-next"
+          type="button"
+          data-bs-target="#heroCarousel"
+          data-bs-slide="next"
+          style={{ width: '5%', opacity: 0.7 }}
+        >
+          <span className="carousel-control-next-icon" />
         </button>
       </div>
 
-      {/* Recommended Products */}
-      <section className="py-5">
-        <div className="container">
-          <div className="text-center mb-5">
-            <h2 className="fw-bold text-white">Recommended Products</h2>
-            <p className="text-muted">Handpicked selections for you</p>
+      {/* ── Featured Selections Section ── */}
+      <section style={{ padding: '100px 0 120px 0', background: 'var(--bg-base)' }}>
+        <div className="container" style={{ maxWidth: '1400px' }}>
+          {/* Editorial Section Header */}
+          <div className="d-flex justify-content-between align-items-flex-end mb-5 flex-wrap gap-3">
+            <div>
+              <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--ink-light)', display: 'block', marginBottom: '8px' }}>
+                CURATED SELECTIONS
+              </span>
+              <h2 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2rem, 4vw, 3rem)', fontWeight: 400, color: 'var(--ink)', margin: 0 }}>
+                Recommended Furniture
+              </h2>
+            </div>
+            <Link
+              to="/products"
+              style={{
+                fontFamily: 'var(--font-sans)',
+                fontSize: '11px',
+                fontWeight: 600,
+                letterSpacing: '0.12em',
+                textTransform: 'uppercase',
+                color: 'var(--ink)',
+                textDecoration: 'none',
+                borderBottom: '1px solid var(--ink)',
+                paddingBottom: '2px',
+              }}
+            >
+              VIEW ALL PRODUCTS ({displayList.length}) &rarr;
+            </Link>
           </div>
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, 1fr)', gap: '1.5rem' }}>
-            {(recommendations.length > 0 ? recommendations : [
-              {
-                id: 1,
-                name: 'Premium Leather Sofa',
-                price: 899,
-                image_url: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=400&h=300&fit=crop',
-                knn_score: 9.2,
-                category: 'Living Room'
-              },
-              {
-                id: 2,
-                name: 'Modern Dining Table',
-                price: 649,
-                image_url: 'https://images.unsplash.com/photo-1549497538-303791108f95?w=400&h=300&fit=crop',
-                knn_score: 8.7,
-                category: 'Dining Room'
-              },
-              {
-                id: 3,
-                name: 'Ergonomic Office Chair',
-                price: 299,
-                image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop',
-                knn_score: 8.4,
-                category: 'Office'
-              },
-              {
-                id: 4,
-                name: 'Wooden Bookshelf',
-                price: 399,
-                image_url: 'https://images.unsplash.com/photo-1594736797933-d0401ba2fe65?w=400&h=300&fit=crop',
-                knn_score: 8.1,
-                category: 'Storage'
-              },
-              {
-                id: 5,
-                name: 'Queen Size Bed Frame',
-                price: 799,
-                image_url: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=400&h=300&fit=crop',
-                knn_score: 7.9,
-                category: 'Bedroom'
-              },
-              {
-                id: 6,
-                name: 'Glass Coffee Table',
-                price: 449,
-                image_url: 'https://images.unsplash.com/photo-1586023492125-27b2c045efd7?w=400&h=300&fit=crop',
-                knn_score: 7.6,
-                category: 'Living Room'
-              }
-            ]).slice(0, 6).map((product, index) => (
-              <div key={product.id || index}>
-                <div className="modern-product-card">
-                  <div className="product-image-container">
-                    <img
-                      src={product.image_url || '/api/placeholder/300/200'}
-                      className="product-image"
-                      alt={product.name}
-                    />
-                    {product.order_count > 0 && (
-                      <div className="stock-badge bg-success text-white">
-                        <i className="fas fa-arrow-up me-1"></i>
-                        Popular
-                      </div>
-                    )}
-                  </div>
-                  <div className="product-content">
-                    <div className="product-category">{product.category}</div>
-                    <h3 className="product-title">
-                      <Link to={`/products/${product.slug || product.id}`}>{product.name}</Link>
-                    </h3>
-                    <div className="product-price">
-                      <span className="current-price">₹{parseFloat(product.price).toFixed(0)}</span>
-                    </div>
-                    <div className="product-actions">
-                      <Link to={`/products/${product.slug || product.id}`} className="add-to-cart-btn text-decoration-none">
-                        {product.order_count > 0 ? (
-                          <>
-                            <i className="fas fa-fire me-2"></i>Popular Choice
-                          </>
-                        ) : (
-                          <>
-                            <i className="fas fa-thumbs-up me-2"></i>Recommended
-                          </>
-                        )}
-                      </Link>
-                    </div>
-                  </div>
-                </div>
-              </div>
+
+          {/* Flat 3-column gallery grid */}
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+              gap: '40px 30px',
+            }}
+          >
+            {displayList.slice(0, 6).map((product, index) => (
+              <ProductCard key={product.id || index} product={product} />
             ))}
           </div>
         </div>

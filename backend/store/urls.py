@@ -8,6 +8,9 @@ urlpatterns = [
     path('auth/register/', views.register, name='register'),
     path('auth/login/', views.login, name='login'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
+    path('auth/forgot-password/', views.forgot_password, name='forgot-password'),
+    path('auth/verify-otp/', views.verify_otp, name='verify-otp'),
+    path('auth/reset-password/', views.reset_password, name='reset-password'),
     path('first-order-discount/', views.first_order_discount, name='first-order-discount'),
     
     # Categories & Products

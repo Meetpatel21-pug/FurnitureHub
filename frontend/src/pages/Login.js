@@ -146,7 +146,12 @@ const Login = () => {
                     )}
                   </button>
                 </form>
-                <div className="text-center mt-4">
+                <div className="text-center mt-3">
+                  <Link to="/forgot-password" style={{color: '#667eea', textDecoration: 'none', fontWeight: '500'}}>
+                    <i className="fas fa-key me-1"></i>Forgot Password?
+                  </Link>
+                </div>
+                <div className="text-center mt-3">
                   <p className={`${isDarkTheme ? 'text-muted' : 'text-secondary'} mb-0`}>Don't have an account? <Link to="/register" style={{color: '#667eea', textDecoration: 'none', fontWeight: '500'}}>Create Account</Link></p>
                 </div>
               </div>

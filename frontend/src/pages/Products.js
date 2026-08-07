@@ -28,14 +28,10 @@ const Products = () => {
         ...(search && { search }),
         page: currentPage
       };
-      
+
       const response = await productsAPI.getAll(params);
       const data = response.data;
-      
-      console.log('Products response:', data);
-      console.log('Selected category:', category);
-      console.log('Products with categories:', data.results?.map(p => ({name: p.name, category: p.category})) || data?.map(p => ({name: p.name, category: p.category})));
-      
+
       if (data.results) {
         setProducts(data.results);
         setTotalPages(Math.ceil(data.count / 12));
@@ -55,8 +51,7 @@ const Products = () => {
     try {
       const response = await productsAPI.getCategories();
       const fetchedCategories = Array.isArray(response.data) ? response.data : [];
-      
-      // Add default categories if none exist
+
       const defaultCategories = fetchedCategories.length > 0 ? fetchedCategories : [
         { id: 1, name: 'Living Room', slug: 'living-room' },
         { id: 2, name: 'Bedroom', slug: 'bedroom' },
@@ -64,7 +59,7 @@ const Products = () => {
         { id: 4, name: 'Office', slug: 'office' },
         { id: 5, name: 'Storage', slug: 'storage' }
       ];
-      
+
       setCategories(defaultCategories);
     } catch (error) {
       console.error('Error fetching categories:', error);
@@ -97,145 +92,165 @@ const Products = () => {
 
   if (loading) {
     return (
-      <div className="products-loading">
-        <div className="container py-5 text-center">
-          <div className="spinner-border text-primary mb-3" role="status" style={{width: '3rem', height: '3rem'}}>
+      <div className="products-loading" style={{ minHeight: '80vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'var(--bg-base)' }}>
+        <div className="text-center">
+          <div className="spinner-border text-dark mb-3" role="status" style={{ width: '2rem', height: '2rem' }}>
             <span className="visually-hidden">Loading...</span>
           </div>
-          <h4 className="text-white">Loading Products...</h4>
+          <h5 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, color: 'var(--ink)' }}>Loading Products...</h5>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="products-page">
-      {/* Page Header */}
-      <div className="container py-4" style={{marginTop: '80px'}}>
-        <div className="d-flex justify-content-between align-items-center mb-4">
+    <div className="products-page" style={{ background: 'var(--bg-base)', minHeight: '100vh', paddingTop: '100px', paddingBottom: '120px' }}>
+      <div className="container" style={{ maxWidth: '1400px' }}>
+
+        {/* Page Header */}
+        <div className="d-flex justify-content-between align-items-flex-end mb-4 border-bottom pb-4" style={{ borderColor: 'var(--border)' }}>
           <div>
-            <h2 className="text-white mb-1">
-              {search ? `Search: "${search}"` : 
-               category ? categories.find(c => c.slug === category)?.name || 'Products' : 
-               'All Products'}
-            </h2>
-            <p className="text-muted mb-0">{products.length} products found</p>
+            <span style={{ fontSize: '11px', fontWeight: 600, letterSpacing: '0.2em', textTransform: 'uppercase', color: 'var(--ink-light)', display: 'block', marginBottom: '6px' }}>
+              CATALOGUE
+            </span>
+            <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2.5rem, 5vw, 3.8rem)', fontWeight: 300, color: 'var(--ink)', margin: 0 }}>
+              {search ? `Search: "${search}"` :
+               category ? categories.find(c => c.slug === category)?.name || 'Products' :
+               'All Collection'}
+            </h1>
           </div>
-          
-          {/* Category Dropdown */}
-          <div className="dropdown">
-            <button className="btn btn-outline-light dropdown-toggle" type="button" data-bs-toggle="dropdown">
-              <i className="fas fa-filter me-2"></i>
-              {category ? categories.find(c => c.slug === category)?.name || 'Category' : 'All Categories'}
-            </button>
-            <ul className="dropdown-menu dropdown-menu-end">
-              <li>
-                <button className="dropdown-item" onClick={() => handleCategoryFilter('')}>
-                  <i className="fas fa-th-large me-2"></i>All Products
-                </button>
-              </li>
-              {Array.isArray(categories) && categories.map(cat => (
-                <li key={cat.id}>
-                  <button className="dropdown-item" onClick={() => handleCategoryFilter(cat.slug)}>
-                    <i className={`${cat.icon} me-2`}></i>{cat.name}
-                  </button>
-                </li>
-              ))}
-            </ul>
+          <div style={{ fontSize: '12px', color: 'var(--ink-light)', fontFamily: 'var(--font-sans)', letterSpacing: '0.05em' }}>
+            ALL ({products.length})
           </div>
         </div>
-      </div>
 
-      {/* Category Tabs */}
-      <div className="container mb-4">
-        <div className="category-tabs">
-          <button 
-            className={`category-tab ${!category ? 'active' : ''}`}
-            onClick={() => handleCategoryFilter('')}
-          >
-            All Products
-          </button>
-          {categories.map(cat => (
-            <button 
-              key={cat.id}
-              className={`category-tab ${category === cat.slug ? 'active' : ''}`}
-              onClick={() => handleCategoryFilter(cat.slug)}
+        {/* Category Tabs — Eastern Edition minimalist filter links */}
+        <div className="mb-5" style={{ borderBottom: '1px solid var(--border)', paddingBottom: '16px' }}>
+          <div className="d-flex flex-wrap gap-4 align-items-center">
+            <button
+              onClick={() => handleCategoryFilter('')}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                fontSize: '12px',
+                fontWeight: !category ? 700 : 400,
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase',
+                color: !category ? 'var(--ink)' : 'var(--ink-light)',
+                cursor: 'pointer',
+                borderBottom: !category ? '2px solid var(--ink)' : '2px solid transparent',
+                paddingBottom: '4px',
+                transition: 'all 0.2s ease',
+              }}
             >
-              {cat.name}
+              ALL PRODUCTS
             </button>
-          ))}
+            {categories.map(cat => (
+              <button
+                key={cat.id}
+                onClick={() => handleCategoryFilter(cat.slug)}
+                style={{
+                  background: 'none',
+                  border: 'none',
+                  padding: 0,
+                  fontSize: '12px',
+                  fontWeight: category === cat.slug ? 700 : 400,
+                  letterSpacing: '0.1em',
+                  textTransform: 'uppercase',
+                  color: category === cat.slug ? 'var(--ink)' : 'var(--ink-light)',
+                  cursor: 'pointer',
+                  borderBottom: category === cat.slug ? '2px solid var(--ink)' : '2px solid transparent',
+                  paddingBottom: '4px',
+                  transition: 'all 0.2s ease',
+                }}
+              >
+                {cat.name}
+              </button>
+            ))}
+          </div>
         </div>
-      </div>
 
-      {/* Products by Category */}
-      <section className="pb-5">
-        <div className="container position-relative">
-          {products.length === 0 ? (
-            <div className="text-center py-5">
-              <div className="empty-state">
-                <i className="fas fa-search fa-4x text-muted mb-4"></i>
-                <h3 className="text-white mb-3">No Products Found</h3>
-                <p className="text-muted mb-4">Try adjusting your search or browse different categories</p>
-                <button 
-                  className="btn btn-gradient px-4 py-2"
-                  onClick={() => handleCategoryFilter('')}
+        {/* Products Grid */}
+        {products.length === 0 ? (
+          <div className="text-center py-5">
+            <div className="empty-state py-5">
+              <i className="fas fa-search fa-3x text-muted mb-4" style={{ opacity: 0.5 }}></i>
+              <h3 style={{ fontFamily: 'var(--font-serif)', fontWeight: 400, color: 'var(--ink)', marginBottom: '12px' }}>No Products Found</h3>
+              <p style={{ color: 'var(--ink-light)', fontSize: '13px', marginBottom: '24px' }}>Try adjusting your search or selecting a different category.</p>
+              <button
+                onClick={() => handleCategoryFilter('')}
+                style={{
+                  padding: '12px 28px',
+                  background: 'var(--ink)',
+                  color: '#fff',
+                  border: 'none',
+                  fontSize: '11px',
+                  fontWeight: 600,
+                  letterSpacing: '0.15em',
+                  textTransform: 'uppercase',
+                  cursor: 'pointer',
+                }}
+              >
+                View All Collection
+              </button>
+            </div>
+          </div>
+        ) : (
+          <>
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(340px, 1fr))',
+                gap: '48px 30px',
+              }}
+            >
+              {products.map(product => (
+                <ProductCard key={product.id} product={product} />
+              ))}
+            </div>
+
+            {/* Pagination */}
+            {totalPages > 1 && (
+              <div className="d-flex justify-content-center align-items-center gap-2 mt-5 pt-4">
+                <button
+                  onClick={() => handlePageChange(currentPage - 1)}
+                  disabled={currentPage === 1}
+                  style={{
+                    background: 'none',
+                    border: '1px solid var(--border)',
+                    color: 'var(--ink)',
+                    padding: '8px 16px',
+                    fontSize: '12px',
+                    cursor: currentPage === 1 ? 'not-allowed' : 'pointer',
+                    opacity: currentPage === 1 ? 0.4 : 1,
+                  }}
                 >
-                  View All Products
+                  &larr; PREVIOUS
+                </button>
+                <span style={{ fontSize: '12px', color: 'var(--ink-light)', margin: '0 12px' }}>
+                  PAGE {currentPage} OF {totalPages}
+                </span>
+                <button
+                  onClick={() => handlePageChange(currentPage + 1)}
+                  disabled={currentPage === totalPages}
+                  style={{
+                    background: 'none',
+                    border: '1px solid var(--border)',
+                    color: 'var(--ink)',
+                    padding: '8px 16px',
+                    fontSize: '12px',
+                    cursor: currentPage === totalPages ? 'not-allowed' : 'pointer',
+                    opacity: currentPage === totalPages ? 0.4 : 1,
+                  }}
+                >
+                  NEXT &rarr;
                 </button>
               </div>
-            </div>
-          ) : (
-            <>
-              <div className="product-grid">
-                {products.map(product => (
-                  <ProductCard key={product.id} product={product} />
-                ))}
-              </div>
-
-              {/* Pagination */}
-              {totalPages > 1 && (
-                <div className="pagination-container mt-5">
-                  <nav>
-                    <ul className="pagination justify-content-center">
-                      <li className={`page-item ${currentPage === 1 ? 'disabled' : ''}`}>
-                        <button
-                          className="page-link"
-                          onClick={() => handlePageChange(currentPage - 1)}
-                          disabled={currentPage === 1}
-                        >
-                          <i className="fas fa-chevron-left"></i>
-                        </button>
-                      </li>
-                      {[...Array(Math.min(5, totalPages))].map((_, index) => {
-                        const pageNum = Math.max(1, Math.min(totalPages - 4, currentPage - 2)) + index;
-                        return (
-                          <li key={pageNum} className={`page-item ${currentPage === pageNum ? 'active' : ''}`}>
-                            <button
-                              className="page-link"
-                              onClick={() => handlePageChange(pageNum)}
-                            >
-                              {pageNum}
-                            </button>
-                          </li>
-                        );
-                      })}
-                      <li className={`page-item ${currentPage === totalPages ? 'disabled' : ''}`}>
-                        <button
-                          className="page-link"
-                          onClick={() => handlePageChange(currentPage + 1)}
-                          disabled={currentPage === totalPages}
-                        >
-                          <i className="fas fa-chevron-right"></i>
-                        </button>
-                      </li>
-                    </ul>
-                  </nav>
-                </div>
-              )}
-            </>
-          )}
-        </div>
-      </section>
+            )}
+          </>
+        )}
+      </div>
 
       <ChatBot showAfterScroll={false} />
     </div>
