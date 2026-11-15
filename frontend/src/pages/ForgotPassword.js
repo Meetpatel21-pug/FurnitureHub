@@ -35,10 +35,11 @@ const ForgotPassword = () => {
 
   const handleSendOtp = async (e) => {
     e.preventDefault();
-    if (!email) return toast.error('Please enter your email');
+    const cleanEmail = email.trim();
+    if (!cleanEmail) return toast.error('Please enter your email');
     setLoading(true);
     try {
-      await authAPI.forgotPassword({ email });
+      await authAPI.forgotPassword({ email: cleanEmail });
       toast.success('OTP sent to your email!');
       setStep(2);
     } catch (err) {
@@ -49,10 +50,12 @@ const ForgotPassword = () => {
 
   const handleVerifyOtp = async (e) => {
     e.preventDefault();
-    if (!otp) return toast.error('Please enter the OTP');
+    const cleanEmail = email.trim();
+    const cleanOtp = otp.trim();
+    if (!cleanOtp) return toast.error('Please enter the OTP');
     setLoading(true);
     try {
-      await authAPI.verifyOtp({ email, otp });
+      await authAPI.verifyOtp({ email: cleanEmail, otp: cleanOtp });
       toast.success('OTP verified!');
       setStep(3);
     } catch (err) {
@@ -63,11 +66,13 @@ const ForgotPassword = () => {
 
   const handleResetPassword = async (e) => {
     e.preventDefault();
+    const cleanEmail = email.trim();
+    const cleanOtp = otp.trim();
     if (passwords.newPassword.length < 6) return toast.error('Password must be at least 6 characters');
     if (passwords.newPassword !== passwords.confirmPassword) return toast.error('Passwords do not match');
     setLoading(true);
     try {
-      await authAPI.resetPassword({ email, otp, new_password: passwords.newPassword });
+      await authAPI.resetPassword({ email: cleanEmail, otp: cleanOtp, new_password: passwords.newPassword });
       toast.success('Password reset successfully!');
       navigate('/login');
     } catch (err) {
@@ -110,7 +115,7 @@ const ForgotPassword = () => {
                     marginBottom: '10px',
                   }}
                 >
-                  FurnitureHub
+                  FurnitureZone
                 </span>
                 <h2
                   style={{

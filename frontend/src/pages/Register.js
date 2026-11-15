@@ -124,7 +124,7 @@ const Register = () => {
                     marginBottom: '10px',
                   }}
                 >
-                  FurnitureHub
+                  FurnitureZone
                 </span>
                 <h2
                   style={{
@@ -135,7 +135,7 @@ const Register = () => {
                     marginBottom: '8px',
                   }}
                 >
-                  Join FurnitureHub
+                  Join FurnitureZone
                 </h2>
                 <p
                   style={{

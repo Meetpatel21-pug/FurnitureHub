@@ -7,6 +7,47 @@ from sklearn.metrics import mean_squared_error, r2_score
 from store.models import Product, Order, OrderItem, Review
 import random
 
+DEFAULT_PRODUCT_IMAGES = {
+    'coffee': 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=800&fit=crop',
+    'sofa': 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&fit=crop',
+    'wardrobe': 'https://images.unsplash.com/photo-1558997519-83ea9252edf8?w=800&fit=crop',
+    'desk': 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&fit=crop',
+    'recliner': 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800&fit=crop',
+    'nightstand': 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&fit=crop',
+    'bed': 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&fit=crop',
+    'bookshelf': 'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&fit=crop',
+    'dining': 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&fit=crop',
+}
+
+def get_product_image_url(product):
+    if product.image:
+        try:
+            return product.image.url
+        except Exception:
+            pass
+    if product.image_url and 'photo-1555041469-a586c61ea9bc' not in product.image_url:
+        return product.image_url
+    name_lower = product.name.lower()
+    if 'coffee' in name_lower or 'table' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['coffee']
+    if 'sofa' in name_lower or 'couch' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['sofa']
+    if 'wardrobe' in name_lower or 'closet' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['wardrobe']
+    if 'desk' in name_lower or 'office' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['desk']
+    if 'recliner' in name_lower or 'chair' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['recliner']
+    if 'nightstand' in name_lower or 'bedside' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['nightstand']
+    if 'bed' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['bed']
+    if 'bookshelf' in name_lower or 'cabinet' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['bookshelf']
+    if 'dining' in name_lower:
+        return DEFAULT_PRODUCT_IMAGES['dining']
+    return product.image_url or DEFAULT_PRODUCT_IMAGES['sofa']
+
 class KNNRecommendationSystem:
     def __init__(self):
         self.model = KNeighborsRegressor(n_neighbors=5, weights='distance')
@@ -140,11 +181,13 @@ class KNNRecommendationSystem:
                 if order_count > 0:
                     score = min(score * 1.2, 10.0)  # Boost by 20% but cap at 10
                 
+                img_url = get_product_image_url(product)
                 recommendations.append({
                     'id': product.id,
                     'name': product.name,
                     'price': float(product.price),
-                    'image_url': product.image_url,
+                    'image': img_url,
+                    'image_url': img_url,
                     'category': product.category.name if product.category else 'General',
                     'knn_score': round(score, 2),
                     'order_count': order_count,
@@ -183,11 +226,13 @@ class KNNRecommendationSystem:
             for product_id, order_count in sorted_products[:limit]:
                 try:
                     product = Product.objects.get(id=product_id)
+                    img_url = get_product_image_url(product)
                     top_products.append({
                         'id': product.id,
                         'name': product.name,
                         'price': float(product.price),
-                        'image_url': product.image_url,
+                        'image': img_url,
+                        'image_url': img_url,
                         'category': product.category.name if product.category else 'General',
                         'order_count': order_count,
                         'slug': product.slug

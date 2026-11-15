@@ -10,13 +10,12 @@ import {
   useProgress,
 } from '@react-three/drei';
 import './FurnitureViewer.css';
-
-const backendBaseUrl = 'http://127.0.0.1:8000';
+import { BACKEND_BASE_URL } from '../services/api';
 
 const resolveMediaUrl = (value) => {
   if (!value) return '';
   if (value.startsWith('http://') || value.startsWith('https://')) return value;
-  return `${backendBaseUrl}${value}`;
+  return `${BACKEND_BASE_URL}${value}`;
 };
 
 const Loader = () => {

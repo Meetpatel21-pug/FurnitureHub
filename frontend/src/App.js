@@ -25,6 +25,9 @@ import Dashboard from './pages/Dashboard';
 import AdminPanel from './pages/AdminPanel';
 import SellerDashboard from './pages/SellerDashboard';
 import BecomeASeller from './pages/BecomeASeller';
+import SellerLogin from './pages/SellerLogin';
+import SellerRegister from './pages/SellerRegister';
+import ChatBot from './components/ChatBot';
 import './App.css';
 
 // Separate component so we can use useLocation inside Router
@@ -32,6 +35,8 @@ function AppLayout() {
   const location = useLocation();
   const isAdminRoute = location.pathname.startsWith('/admin-panel')
     || location.pathname.startsWith('/seller-dashboard')
+    || location.pathname.startsWith('/seller/login')
+    || location.pathname.startsWith('/seller/register')
     || location.pathname.startsWith('/become-a-seller');
 
   return (
@@ -60,10 +65,13 @@ function AppLayout() {
           <Route path="/admin-panel" element={<AdminPanel />} />
           <Route path="/seller-dashboard" element={<SellerDashboard />} />
           <Route path="/become-a-seller" element={<BecomeASeller />} />
+          <Route path="/seller/login" element={<SellerLogin />} />
+          <Route path="/seller/register" element={<SellerRegister />} />
         </Routes>
       </main>
       {!isAdminRoute && <Footer />}
       {!isAdminRoute && <MobileBottomNav />}
+      {!isAdminRoute && <ChatBot showAfterScroll={false} />}
       <ToastContainer position="top-right" autoClose={3000} />
     </div>
   );

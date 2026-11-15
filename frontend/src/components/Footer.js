@@ -31,7 +31,7 @@ const Footer = () => {
                   textTransform: 'uppercase',
                 }}
               >
-                NEWSLETTER
+                FURNITUREZONE
               </span>
             </div>
             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', marginBottom: '20px', lineHeight: 1.6 }}>
@@ -46,7 +46,7 @@ const Footer = () => {
                 type="email"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                placeholder="SUBSCRIBE TO OUR NEWSLETTER"
+                placeholder="SUBSCRIBE TO OUR FURNITUREZONE"
                 required
                 id="footer-newsletter-email"
                 style={{
@@ -104,7 +104,7 @@ const Footer = () => {
               T. 070. 8129. 1111
             </p>
             <p style={{ color: 'rgba(255,255,255,0.6)', fontSize: '12px', marginBottom: '24px' }}>
-              E. contact@furniturehub.com
+              E. contact@furniturezone.com
             </p>
 
             <div style={{ display: 'flex', gap: '16px', fontSize: '16px', color: 'rgba(255,255,255,0.7)' }}>
@@ -177,10 +177,10 @@ const Footer = () => {
         {/* Bottom Legal / Copyright Bar */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '16px' }}>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
-            COMPANY: FurnitureHub Co., Ltd. ADDRESS: Design District 17, Seoul / Gangnam. E-MAIL: contact@furniturehub.com
+            COMPANY: FurnitureZone. E-MAIL: contact@furniturezone.com
           </p>
           <p style={{ color: 'rgba(255,255,255,0.4)', fontSize: '11px', margin: 0 }}>
-            &copy; {new Date().getFullYear()} FURNITUREHUB All rights reserved.
+            &copy; {new Date().getFullYear()} FURNITUREZONE All rights reserved.
           </p>
         </div>
       </div>

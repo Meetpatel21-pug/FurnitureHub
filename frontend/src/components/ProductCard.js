@@ -5,6 +5,8 @@ import { useCart } from '../context/CartContext';
 import { useWishlist } from '../context/WishlistContext';
 import { toast } from 'react-toastify';
 
+import { getProductImage } from '../utils/productImages';
+
 const renderStars = (rating) => {
   const stars = [];
   const full  = Math.floor(rating);
@@ -76,7 +78,7 @@ const ProductCard = ({ product }) => {
       >
         <Link to={`/products/${product.slug}`} tabIndex={-1} aria-label={`View ${product.name}`}>
           <img
-            src={product.image || product.image_url || 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=500&h=400&fit=crop'}
+            src={getProductImage(product)}
             className="product-image"
             alt={product.name}
             loading="lazy"

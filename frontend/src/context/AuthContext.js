@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { authAPI } from '../services/api';
+import { authAPI, BACKEND_BASE_URL } from '../services/api';
 
 const AuthContext = createContext();
 
@@ -40,7 +40,7 @@ export const AuthProvider = ({ children }) => {
       if (!error.response) {
         return {
           success: false,
-          error: 'Cannot reach the backend server. Make sure Django is running at http://127.0.0.1:8000.'
+          error: `Cannot reach the backend server at ${BACKEND_BASE_URL}.`
         };
       }
 
@@ -63,6 +63,25 @@ export const AuthProvider = ({ children }) => {
     }
   };
 
+  const vendorRegister = async (userData) => {
+    try {
+      const response = await authAPI.vendorRegister(userData);
+      const { user, access, refresh } = response.data;
+      
+      sessionStorage.setItem('access_token', access);
+      sessionStorage.setItem('refresh_token', refresh);
+      sessionStorage.setItem('user', JSON.stringify(user));
+      
+      setUser(user);
+      return { success: true };
+    } catch (error) {
+      return { 
+        success: false, 
+        error: error.response?.data || 'Seller registration failed' 
+      };
+    }
+  };
+
   const logout = () => {
     authAPI.logout();
     setUser(null);
@@ -72,6 +91,7 @@ export const AuthProvider = ({ children }) => {
     user,
     login,
     register,
+    vendorRegister,
     logout,
     loading,
     isAuthenticated: !!user

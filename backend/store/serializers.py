@@ -3,9 +3,14 @@ from django.contrib.auth.models import User
 from .models import Category, Product, Cart, CartItem, Wishlist, Order, OrderItem, Review, UserProfile, RoomScan, DetectedObject, RoomRecommendation, Vendor
 
 class UserSerializer(serializers.ModelSerializer):
+    is_vendor = serializers.SerializerMethodField()
+
     class Meta:
         model = User
-        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser']
+        fields = ['id', 'username', 'email', 'first_name', 'last_name', 'is_staff', 'is_superuser', 'is_vendor']
+
+    def get_is_vendor(self, obj):
+        return hasattr(obj, 'vendor_profile')
 
 class UserProfileSerializer(serializers.ModelSerializer):
     user = UserSerializer(read_only=True)
@@ -37,11 +42,24 @@ class VendorSerializer(serializers.ModelSerializer):
     def get_product_count(self, obj):
         return obj.products.count()
 
+DEFAULT_PRODUCT_IMAGES = {
+    'coffee': 'https://images.unsplash.com/photo-1533090161767-e6ffed986c88?w=800&fit=crop',
+    'sofa': 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&fit=crop',
+    'wardrobe': 'https://images.unsplash.com/photo-1558997519-83ea9252edf8?w=800&fit=crop',
+    'desk': 'https://images.unsplash.com/photo-1518455027359-f3f8164ba6bd?w=800&fit=crop',
+    'recliner': 'https://images.unsplash.com/photo-1567538096630-e0c55bd6374c?w=800&fit=crop',
+    'nightstand': 'https://images.unsplash.com/photo-1616046229478-9901c5536a45?w=800&fit=crop',
+    'bed': 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&fit=crop',
+    'bookshelf': 'https://images.unsplash.com/photo-1594620302200-9a762244a156?w=800&fit=crop',
+    'dining': 'https://images.unsplash.com/photo-1617806118233-18e1de247200?w=800&fit=crop',
+}
+
 class ProductSerializer(serializers.ModelSerializer):
     category = CategorySerializer(read_only=True)
     vendor_info = serializers.SerializerMethodField()
     average_rating = serializers.SerializerMethodField()
     review_count = serializers.SerializerMethodField()
+    image_url = serializers.SerializerMethodField()
 
     class Meta:
         model = Product
@@ -52,6 +70,35 @@ class ProductSerializer(serializers.ModelSerializer):
             'stock', 'available', 'created',
             'average_rating', 'review_count'
         ]
+
+    def get_image_url(self, obj):
+        if obj.image:
+            request = self.context.get('request')
+            if request:
+                return request.build_absolute_uri(obj.image.url)
+            return obj.image.url
+        if obj.image_url and 'photo-1555041469-a586c61ea9bc' not in obj.image_url:
+            return obj.image_url
+        name_lower = obj.name.lower()
+        if 'coffee' in name_lower or 'table' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['coffee']
+        if 'sofa' in name_lower or 'couch' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['sofa']
+        if 'wardrobe' in name_lower or 'closet' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['wardrobe']
+        if 'desk' in name_lower or 'office' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['desk']
+        if 'recliner' in name_lower or 'chair' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['recliner']
+        if 'nightstand' in name_lower or 'bedside' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['nightstand']
+        if 'bed' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['bed']
+        if 'bookshelf' in name_lower or 'cabinet' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['bookshelf']
+        if 'dining' in name_lower:
+            return DEFAULT_PRODUCT_IMAGES['dining']
+        return obj.image_url or DEFAULT_PRODUCT_IMAGES['sofa']
 
     def get_average_rating(self, obj):
         return obj.get_average_rating()

@@ -1,9 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { toast } from 'react-toastify';
-import { roomAIAPI, mlAPI, productsAPI } from '../services/api';
-
-const backendBaseUrl = 'http://127.0.0.1:8000';
+import { roomAIAPI, mlAPI, productsAPI, BACKEND_BASE_URL } from '../services/api';
 
 const fallbackRecommendations = [
   {
@@ -47,7 +45,7 @@ const fallbackRecommendations = [
 const resolveMediaUrl = (value) => {
   if (!value) return '';
   if (value.startsWith('http://') || value.startsWith('https://')) return value;
-  return `${backendBaseUrl}${value}`;
+  return `${BACKEND_BASE_URL}${value}`;
 };
 
 const RoomAnalyzer = () => {
@@ -117,6 +115,11 @@ const RoomAnalyzer = () => {
     try {
       setAnalyzing(true);
       const response = await roomAIAPI.analyzeRoom(formData);
+      if (response.data.error) {
+        toast.error(response.data.error);
+        setAnalysis(null);
+        return;
+      }
       setAnalysis(response.data);
       toast.success('Room analysis complete.');
     } catch (error) {
@@ -144,11 +147,7 @@ const RoomAnalyzer = () => {
     const budgetVal = Number(budget);
     const withinBudget = availableRecs.filter((item) => Number(item.price || 0) <= budgetVal);
     
-    if (withinBudget.length > 0) {
-      return withinBudget;
-    }
-    
-    return [...availableRecs].sort((a, b) => Number(a.price || 0) - Number(b.price || 0));
+    return withinBudget;
   }, [baseRecommendations, budget]);
 
   return (
@@ -254,6 +253,7 @@ const RoomAnalyzer = () => {
               </div>
             </div>
 
+            {analysis && (
             <div>
               <div className="room-ai-card rounded-4 p-3 p-md-4 h-100">
                 <div className="d-flex justify-content-between align-items-center mb-3">
@@ -310,6 +310,7 @@ const RoomAnalyzer = () => {
                 </div>
               </div>
             </div>
+            )}
           </div>
         </div>
       </section>

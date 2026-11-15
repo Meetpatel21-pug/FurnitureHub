@@ -6,6 +6,7 @@ urlpatterns = [
     path('ai/chat/', views.chat_with_furnibot, name='ai-chat'),
     # Authentication
     path('auth/register/', views.register, name='register'),
+    path('auth/vendor-register/', views.vendor_auth_register, name='vendor-auth-register'),
     path('auth/login/', views.login, name='login'),
     path('auth/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
     path('auth/forgot-password/', views.forgot_password, name='forgot-password'),
@@ -55,7 +56,7 @@ urlpatterns = [
     path('admin/products/', views.admin_products, name='admin-products'),
     path('admin/products/create/', views.admin_create_product, name='admin-create-product'),
     path('admin/products/<int:product_id>/update/', views.admin_update_product, name='admin-update-product'),
-    path('admin/products/<int:product_id>/delete/', views.admin_delete_product, name='admin-delete-product'),
+    path('admin/products/<int:product_id>/remove/', views.admin_remove_product, name='admin-remove-product'),
     path('admin/users/', views.admin_users, name='admin-users'),
     path('admin/users/create/', views.admin_create_user, name='admin-create-user'),
     path('admin/users/create/', views.admin_create_user, name='admin-create-user'),

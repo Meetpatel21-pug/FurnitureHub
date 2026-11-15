@@ -3,6 +3,7 @@ import { Link } from 'react-router-dom';
 import { mlAPI, ordersAPI, productsAPI } from '../services/api';
 import { useAuth } from '../context/AuthContext';
 import ProductCard from '../components/ProductCard';
+import CollectionSlider from '../components/CollectionSlider';
 
 const Home = () => {
   const { user } = useAuth();
@@ -59,7 +60,7 @@ const Home = () => {
         ]);
         const recommendationsData = recommendationsRes.data.recommendations || [];
         setRecommendations(Array.isArray(recommendationsData) ? recommendationsData : []);
-        
+
         const productsData = productsRes.data?.results || productsRes.data || [];
         setDbFallback(Array.isArray(productsData) ? productsData : []);
       } catch (error) {
@@ -117,33 +118,12 @@ const Home = () => {
   const rawList = recommendations.length > 0 ? recommendations : dbFallback;
   const displayList = rawList.filter(availableFilter).slice(0, 6);
 
-  const collections = [
-    {
-      title: 'Table',
-      image: 'https://images.unsplash.com/photo-1577140917170-285929fb55b7?w=800&fit=crop',
-      link: '/products?category=dining-room',
-    },
-    {
-      title: 'Chair',
-      image: 'https://images.unsplash.com/photo-1580481072645-022f9a6d859b?w=800&fit=crop',
-      link: '/products?category=office',
-    },
-    {
-      title: 'Sofa',
-      image: 'https://images.unsplash.com/photo-1555041469-a586c61ea9bc?w=800&fit=crop',
-      link: '/products?category=living-room',
-    },
-    {
-      title: 'Bed',
-      image: 'https://images.unsplash.com/photo-1505693416388-ac5ce068fe85?w=800&fit=crop',
-      link: '/products?category=bedroom',
-    },
-  ];
+
 
   return (
     <div style={{ background: 'var(--bg-base)' }}>
       {/* ── Editorial Hero Section ── */}
-      <div id="heroCarousel" className="carousel slide" data-bs-ride="carousel" data-bs-interval="4000" style={{ position: 'relative' }}>
+      <div id="heroCarousel" className="carousel slide" style={{ position: 'relative' }}>
         <div className="carousel-inner">
           <div className="carousel-item active">
             <div
@@ -256,93 +236,7 @@ const Home = () => {
       </div>
 
       {/* ── Shop Our Collections Section (Eastern Edition Style) ── */}
-      <section style={{ padding: '90px 0 70px 0', background: 'var(--bg-base)' }}>
-        <div className="container" style={{ maxWidth: '1400px' }}>
-          <div className="mb-5">
-            <h2
-              style={{
-                fontFamily: 'var(--font-sans)',
-                fontSize: 'clamp(1.4rem, 2.5vw, 1.8rem)',
-                fontWeight: 500,
-                letterSpacing: '0.06em',
-                textTransform: 'uppercase',
-                color: 'var(--ink)',
-                marginBottom: '10px',
-              }}
-            >
-              SHOP OUR COLLECTIONS
-            </h2>
-            <p
-              style={{
-                fontSize: '0.95rem',
-                color: 'var(--ink-muted)',
-                margin: 0,
-                maxWidth: '750px',
-                lineHeight: 1.6,
-                fontWeight: 400,
-              }}
-            >
-              The importance of heritage, locality, and sustainability is the grounding vision for Eastern Edition.
-            </p>
-          </div>
-
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(auto-fit, minmax(240px, 1fr))',
-              gap: '20px',
-            }}
-          >
-            {collections.map((item, index) => (
-              <Link
-                key={index}
-                to={item.link}
-                style={{ textDecoration: 'none', color: 'inherit' }}
-                className="collection-card-item"
-              >
-                <div
-                  style={{
-                    position: 'relative',
-                    background: 'var(--bg-surface)',
-                    aspectRatio: '1 / 1',
-                    overflow: 'hidden',
-                    display: 'flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    padding: '30px',
-                    transition: 'background-color 0.3s ease',
-                  }}
-                >
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    style={{
-                      maxWidth: '90%',
-                      maxHeight: '90%',
-                      objectFit: 'contain',
-                      transition: 'transform 0.4s cubic-bezier(0.25, 1, 0.5, 1)',
-                    }}
-                    className="collection-card-img"
-                  />
-                  <span
-                    style={{
-                      position: 'absolute',
-                      bottom: '20px',
-                      left: '20px',
-                      fontSize: '0.9rem',
-                      fontWeight: 400,
-                      color: 'var(--ink)',
-                      letterSpacing: '0.01em',
-                    }}
-                  >
-                    {item.title}
-                  </span>
-                </div>
-              </Link>
-            ))}
-          </div>
-        </div>
-      </section>
+      <CollectionSlider />
 
       {/* ── Featured Selections Section ── */}
       <section style={{ padding: '100px 0 120px 0', background: 'var(--bg-base)' }}>

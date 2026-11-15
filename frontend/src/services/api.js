@@ -1,6 +1,7 @@
 import axios from 'axios';
 
-const API_BASE_URL = 'http://127.0.0.1:8000/api';
+export const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://127.0.0.1:8000/api';
+export const BACKEND_BASE_URL = API_BASE_URL.replace(/\/api\/?$/, '');
 
 const api = axios.create({
   baseURL: API_BASE_URL,
@@ -40,9 +41,13 @@ api.interceptors.response.use(
 );
 
 export const authAPI = {
-  login: (credentials) => api.post('/auth/login/', credentials),
-  register: (userData) => api.post('/auth/register/', userData),
-  forgotPassword: (data) => api.post('/auth/forgot-password/', data),
+  login: (credentials) => api.post('auth/login/', credentials),
+  register: (userData) => api.post('auth/register/', userData),
+  vendorRegister: (userData) => api.post('auth/vendor-register/', userData),
+  forgotPassword: (data) => {
+    const payload = typeof data === 'string' ? { email: data } : data;
+    return api.post('/auth/forgot-password/', payload);
+  },
   verifyOtp: (data) => api.post('/auth/verify-otp/', data),
   resetPassword: (data) => api.post('/auth/reset-password/', data),
   logout: () => {
@@ -113,7 +118,7 @@ export const adminAPI = {
   createProduct: (data) => api.post('/admin/products/create/', data),
   updateProduct: (id, data) => api.put(`/admin/products/${id}/update/`, data),
   getProducts: () => api.get('/admin/products/'),
-  deleteProduct: (id) => api.delete(`/admin/products/${id}/delete/`),
+  removeProduct: (id) => api.put(`/admin/products/${id}/remove/`),
   
   // Users
   getUsers: () => api.get('/admin/users/'),

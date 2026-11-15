@@ -2,7 +2,6 @@ import React, { useState, useEffect } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import { productsAPI } from '../services/api';
 import ProductCard from '../components/ProductCard';
-import ChatBot from '../components/ChatBot';
 
 const Products = () => {
   const [products, setProducts] = useState([]);
@@ -49,27 +48,20 @@ const Products = () => {
 
   const fetchCategories = async () => {
     try {
-      const response = await productsAPI.getCategories();
-      const fetchedCategories = Array.isArray(response.data) ? response.data : [];
-
-      const defaultCategories = fetchedCategories.length > 0 ? fetchedCategories : [
-        { id: 1, name: 'Living Room', slug: 'living-room' },
-        { id: 2, name: 'Bedroom', slug: 'bedroom' },
-        { id: 3, name: 'Dining Room', slug: 'dining-room' },
-        { id: 4, name: 'Office', slug: 'office' },
-        { id: 5, name: 'Storage', slug: 'storage' }
+      // We are fully ignoring the backend database Category model now.
+      const fixedCategories = [
+        { id: 'table', name: 'Table', slug: 'table' },
+        { id: 'chair', name: 'Chair', slug: 'chair' },
+        { id: 'sofa', name: 'Sofa', slug: 'sofa' },
+        { id: 'bed', name: 'Bed', slug: 'bed' },
+        { id: 'storage', name: 'Storage', slug: 'storage' },
+        { id: 'bathroom', name: 'Bathroom', slug: 'bathroom' },
+        { id: 'kitchen', name: 'Kitchen', slug: 'kitchen' },
+        { id: 'dining-table', name: 'Dining Table', slug: 'dining-table' }
       ];
-
-      setCategories(defaultCategories);
+      setCategories(fixedCategories);
     } catch (error) {
-      console.error('Error fetching categories:', error);
-      setCategories([
-        { id: 1, name: 'Living Room', slug: 'living-room' },
-        { id: 2, name: 'Bedroom', slug: 'bedroom' },
-        { id: 3, name: 'Dining Room', slug: 'dining-room' },
-        { id: 4, name: 'Office', slug: 'office' },
-        { id: 5, name: 'Storage', slug: 'storage' }
-      ]);
+      console.error('Error setting categories:', error);
     }
   };
 
@@ -115,8 +107,8 @@ const Products = () => {
             </span>
             <h1 style={{ fontFamily: 'var(--font-serif)', fontSize: 'clamp(2.5rem, 5vw, 3.8rem)', fontWeight: 300, color: 'var(--ink)', margin: 0 }}>
               {search ? `Search: "${search}"` :
-               category ? categories.find(c => c.slug === category)?.name || 'Products' :
-               'All Collection'}
+                category ? categories.find(c => c.slug === category)?.name || 'Products' :
+                  'All Collection'}
             </h1>
           </div>
           <div style={{ fontSize: '12px', color: 'var(--ink-light)', fontFamily: 'var(--font-sans)', letterSpacing: '0.05em' }}>
@@ -251,8 +243,6 @@ const Products = () => {
           </>
         )}
       </div>
-
-      <ChatBot showAfterScroll={false} />
     </div>
   );
 };

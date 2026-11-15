@@ -6,7 +6,7 @@ import { useCart } from '../context/CartContext';
 
 // ─── UPI Config ───────────────────────────────────────────────────────────────
 const UPI_ID   = 'meetparsana211@okaxis';
-const MERCHANT = 'FurnitureHub';
+const MERCHANT = 'FurnitureZone';
 
 // Build UPI deep-link
 const buildUpiUrl = (amount, orderId) => {
@@ -15,7 +15,7 @@ const buildUpiUrl = (amount, orderId) => {
     pn: MERCHANT,
     am: amount.toFixed(2),
     cu: 'INR',
-    tn: `FurnitureHub Order #${orderId}`,
+    tn: `FurnitureZone Order #${orderId}`,
   });
   return `upi://pay?${params.toString()}`;
 };
@@ -39,7 +39,7 @@ const UpiQRCode = ({ amount, orderId, size = 220 }) => {
       const blob   = await res.blob();
       const link   = document.createElement('a');
       link.href    = URL.createObjectURL(blob);
-      link.download = `FurnitureHub-QR-Order-${orderId}.png`;
+      link.download = `FurnitureZone-QR-Order-${orderId}.png`;
       link.click();
     } catch {
       toast.error('Download failed. Try right-clicking the QR and saving.');
@@ -223,7 +223,7 @@ const PaymentConfirmation = () => {
                           <div className="d-flex align-items-center justify-content-between">
                             <div>
                               <h5 className="mb-0 text-white fw-bold"><i className="fas fa-receipt me-2" style={{ color:'#667eea' }} />Order Invoice</h5>
-                              <small style={{ color:'#9ca3af' }}>FurnitureHub</small>
+                              <small style={{ color:'#9ca3af' }}>FurnitureZone</small>
                             </div>
                             <div style={{ background:'linear-gradient(135deg,#667eea,#764ba2)', borderRadius:'8px', padding:'4px 12px' }}>
                               <span style={{ color:'#fff', fontSize:'0.75rem', fontWeight:600 }}>#{orderId}</span>

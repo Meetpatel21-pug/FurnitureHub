@@ -1,4 +1,4 @@
-# FurnitureHub — Multi-Vendor Marketplace & AI Room Designer
+# FurnitureZone — Multi-Vendor Marketplace & AI Room Designer
 
 A luxury online furniture marketplace and interior design platform built with **React** frontend and **Django REST Framework** backend.
 
@@ -156,6 +156,28 @@ npm start
 - `GET /api/orders/<id>/invoice/` — Download order PDF invoice
 
 ---
+
+## 🚀 Deploy with Render
+
+The repository includes [`render.yaml`](./render.yaml) for deploying both services:
+
+1. Push the repository to GitHub.
+2. In Render, choose **New → Blueprint** and select the repository.
+3. Render will create:
+   - `furniture-api` — Django/Gunicorn web service
+   - `furniture-frontend` — React static site
+4. Set these values in the `furniture-api` environment:
+   - `CORS_ALLOWED_ORIGINS=https://<frontend-service>.onrender.com`
+   - `CSRF_TRUSTED_ORIGINS=https://<frontend-service>.onrender.com`
+   - `XAI_API_KEY` — a newly generated server-side key, if AI chat is enabled
+   - `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD`, and email sender values, if email is enabled
+5. Set `REACT_APP_API_URL` in `furniture-frontend` to:
+   `https://<backend-service>.onrender.com/api`
+6. Trigger a frontend redeploy after setting `REACT_APP_API_URL`, because React embeds environment variables during its build.
+
+The deployment uses SQLite as requested. Render service storage is ephemeral, so SQLite data and uploaded media can be lost when the service is replaced or redeployed. Use PostgreSQL and persistent object storage for production data.
+
+Never commit `.env` files or reuse credentials from local development. Rotate exposed credentials and configure replacement values only in Render environment variables.
 
 ## 📄 License
 
